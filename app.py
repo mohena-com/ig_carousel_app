@@ -1,4 +1,5 @@
 import asyncio
+import os
 from generator import CarouselGenerator
 from renderer import render_deck_to_images
 
@@ -19,6 +20,23 @@ def main():
     print("\nStep 2: Rendering PNG carousel images...")
     asyncio.run(render_deck_to_images(carousel_data))
     print("\nSuccess! Instagram Carousel generated in folder: ./output_carousel/")
+
+def main():
+
+    generator = CarouselGenerator(
+        ollama_host=os.getenv(
+            "OLLAMA_HOST",
+            "http://webmaster-ai.local:11434",
+        ),
+        model=os.getenv(
+            "OLLAMA_MODEL",
+            "qwen3:8b",
+        ),
+    )
+
+    # Your existing source text / carousel generation code
+    # continues below this point.
+
 
 if __name__ == "__main__":
     main()
