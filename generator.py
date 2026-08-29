@@ -16,30 +16,19 @@ class CarouselGenerator:
         Model : qwen3:8b
     """
 
-    def __init__(
-        self,
-        ollama_host: str | None = None,
-        model: str | None = None,
-        timeout: int = 300,
-    ):
-        self.ollama_host = (
-            ollama_host
-            or os.getenv("OLLAMA_HOST")
-            or "http://webmaster-ai.local:11434"
-        ).rstrip("/")
+    def __init__(self, ollama_host: str | None = None, model: str | None = None, timeout: int = 300,):
+        self.ollama_host = (ollama_host or os.getenv("OLLAMA_HOST") or "http://webmaster-ai.local:11434").rstrip("/")
+        print(f"Ollama host : {self.ollama_host}")
 
-        self.model = (
-            model
-            or os.getenv("OLLAMA_MODEL")
-            or "qwen3:8b"
-        )
+        self.model = (model or os.getenv("OLLAMA_MODEL") or "qwen3:8b")
+        print(f"Ollama model: {self.model}")
 
         self.timeout = timeout
-
+        print(f"Ollama timeout: {self.timeout}")
+        
         self.chat_url = f"{self.ollama_host}/api/chat"
-
-        print(f"Ollama host : {self.ollama_host}")
-        print(f"Ollama model: {self.model}")
+        print(f"Ollama chat URL: {self.chat_url}")       
+        
 
     def check_connection(self) -> None:
         """Verify that Ollama is reachable and the requested model exists."""
