@@ -10,8 +10,9 @@ ig_carousel_app/
 
 
 ```bash
-python3.1 -m venv .venv
+deactivate 2>/dev/null || true
 source .venv/bin/activate
+
 pip install -r requirements.txt
 
 python3.1 main.py --max-jobs 3

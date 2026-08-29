@@ -8,7 +8,7 @@ from renderer import render
 def main():
     ap=argparse.ArgumentParser(description="Lossless-ish six-slide Instagram carousel generator for normalized job TXT files")
     ap.add_argument("--input","-i",required=True)
-    ap.add_argument("--output","-o",default="output_carousel")
+    ap.add_argument("--output","-o",default="../output_carousel")
     args=ap.parse_args()
     facts=parse_file(args.input)
     deck=make_deck(facts)
