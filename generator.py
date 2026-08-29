@@ -405,7 +405,7 @@ SLIDE 3 — ELIGIBILITY
 Qualification, experience, age and post-specific requirements that exist.
 
 SLIDE 4 — FEES / PAY / SELECTION
-Dynamically include only available sections.
+Dynamically include only available sections. Strictly select the fee amount, avoid any errors.
 
 SLIDE 5 — APPLICATION / IMPORTANT DATES
 Show application_start and application_end prominently when available.
