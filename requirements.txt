@@ -6,3 +6,4 @@ playwright>=1.40.0
 jinja2>=3.0.0
 datasets>=2.0.0
 trl>=0.8.0
+qrcode[pil]>=7.4.2
