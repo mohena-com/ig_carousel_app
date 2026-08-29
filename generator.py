@@ -5,7 +5,7 @@ from typing import Any
 
 import requests
 
-from schema import IGCarouselDeck, IGSlide
+from schema import IGCarouselDeck
 
 
 class CarouselGenerator:
@@ -428,7 +428,6 @@ Return JSON only, matching:
   "slides": [
     {
       "slide_number": 1,
-      "slide_type": "hook",
       "title": "string",
       "subtitle_or_body": "string or null",
       "bullets": [],
@@ -490,17 +489,8 @@ Exactly 6 slides. No image_url field.
         else:
             bullets = None
 
-        slide_type = str(raw.get("slide_type", "")).lower()
-        if slide_type not in {"hook", "content_list", "key_metric", "cta"}:
-            slide_type = (
-                "hook" if index == 1
-                else "cta" if index == 6
-                else "content_list"
-            )
-
         return {
             "slide_number": index,
-            "slide_type": slide_type,
             "title": title[:80],
             "subtitle_or_body": body[:500] or None,
             "bullets": bullets,
@@ -560,9 +550,6 @@ Exactly 6 slides. No image_url field.
             title, body = filler[i - 1]
             slides.append({
                 "slide_number": i,
-                "slide_type": (
-                    "hook" if i == 1 else "cta" if i == 6 else "content_list"
-                ),
                 "title": title,
                 "subtitle_or_body": body,
                 "bullets": None,
@@ -571,8 +558,6 @@ Exactly 6 slides. No image_url field.
             })
 
         slides = slides[:6]
-        slides[0]["slide_type"] = "hook"
-        slides[5]["slide_type"] = "cta"
 
         for i, slide in enumerate(slides, 1):
             slide["slide_number"] = i
