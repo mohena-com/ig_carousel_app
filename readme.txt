@@ -20,3 +20,6 @@ python3.1 main.py --max-jobs 3
 ```text
 http://webmaster-ai.local:11434
 ```
+
+
+./run.sh --input article.txt
