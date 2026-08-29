@@ -52,7 +52,7 @@ def build_slide_html(slide: dict, theme: str, total_slides: int) -> str:
     </head>
     <body>
         <div>
-            <div class="tag">{slide['slide_type']}</div>
+            <div class="tag">SLIDE {slide['slide_number']}</div>
             <h1 class="title">{slide['title']}</h1>
             {content_html}
         </div>
