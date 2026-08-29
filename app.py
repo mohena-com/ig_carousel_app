@@ -1,5 +1,6 @@
 import argparse
 import asyncio
+import json
 import os
 from pathlib import Path
 
@@ -18,44 +19,30 @@ to under 2 hours. Start automating your workflow today to keep churn low.
 def load_source(path: str | None) -> str:
     if not path:
         return DEFAULT_SAMPLE
-
     source = Path(path)
     if not source.exists():
         raise FileNotFoundError(f"Input file not found: {source}")
-
     text = source.read_text(encoding="utf-8").strip()
     if not text:
         raise ValueError(f"Input file is empty: {source}")
-
     return text
 
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Generate an Instagram carousel using Ollama and render PNG slides."
+        description="Generate and render a six-slide Instagram carousel using Ollama."
     )
-    parser.add_argument(
-        "--input",
-        "-i",
-        help="UTF-8 text file containing the source material.",
-    )
+    parser.add_argument("--input", "-i")
     parser.add_argument(
         "--ollama-host",
         default=os.getenv("OLLAMA_HOST", "http://localhost:11434"),
-        help="Ollama URL.",
     )
     parser.add_argument(
         "--ollama-model",
         default=os.getenv("OLLAMA_MODEL", "qwen3:8b"),
-        help="Ollama model name.",
     )
-    parser.add_argument(
-        "--timeout",
-        type=int,
-        default=300,
-        help="Ollama request timeout in seconds.",
-    )
-
+    parser.add_argument("--timeout", type=int, default=300)
+    parser.add_argument("--output", default="output_carousel")
     args = parser.parse_args()
 
     source_text = load_source(args.input)
@@ -76,15 +63,33 @@ def main():
 
     carousel_data = generator.generate_carousel_json(source_text)
 
-    print("JSON generated successfully.")
+    output_dir = Path(args.output)
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    json_path = output_dir / "carousel.json"
+    json_path.write_text(
+        json.dumps(carousel_data, indent=2, ensure_ascii=False),
+        encoding="utf-8",
+    )
+
+    print(f"JSON generated successfully: {json_path}")
+    print(f"Slides: {len(carousel_data['slides'])}")
     print()
 
     print("Step 2: Rendering PNG carousel images...")
-    asyncio.run(render_deck_to_images(carousel_data))
+    asyncio.run(
+        render_deck_to_images(
+            carousel_data,
+            output_dir=str(output_dir),
+        )
+    )
 
     print()
-    print("Success! Instagram Carousel generated in:")
-    print("./output_carousel/")
+    print("==============================================")
+    print(" SUCCESS")
+    print("==============================================")
+    print(f"JSON : {json_path}")
+    print(f"PNGs : {output_dir}/slide_1.png ... slide_6.png")
 
 
 if __name__ == "__main__":

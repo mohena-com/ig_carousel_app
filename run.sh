@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
-set -e
+export OLLAMA_HOST="${OLLAMA_HOST:-http://webmaster-ai.local:11434}"
+export OLLAMA_MODEL="${OLLAMA_MODEL:-qwen3:8b}"
 
-OLLAMA_HOST=http://webmaster-ai.local:11434 \
-OLLAMA_MODEL=qwen3:8b \
-python app.py "$@"
+exec python app.py "$@"
