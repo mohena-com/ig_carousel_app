@@ -1043,7 +1043,7 @@ async def render(deck, out):
         browser = await p.chromium.launch(
             headless=True,
             args=["--no-sandbox"],
-)       )
+        )
 
         page = await browser.new_page(
             viewport={"width": W, "height": H},
