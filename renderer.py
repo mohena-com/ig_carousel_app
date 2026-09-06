@@ -249,7 +249,7 @@ def build_html(slide, total, theme="professional_white"):
           {f"""
           <div class="hero-stat">
             <div class="hero-stat-number">{esc(metric)}</div>
-            <div class="hero-stat-label">{esc(metric_label)}</div>
+            <!-- small duplicate vacancy label removed -->
           </div>
           """ if metric else ""}
 
@@ -392,15 +392,16 @@ body:after {{
   margin-top:29px;
   display:inline-flex;
   align-self:flex-start;
-  background:{SOFT_BLUE};
-  color:{BLUE};
-  border-radius:999px;
-  padding:8px 13px;
-  font-size:12px;
+  background:{GOLD};
+  color:{NAVY};
+  border-radius:10px;
+  padding:10px 16px;
+  font-size:14px;
   font-weight:950;
-  letter-spacing:.75px;
+  letter-spacing:.55px;
   text-transform:uppercase;
   max-width:900px;
+  box-shadow:0 4px 12px rgba(228,165,28,.16);
 }}
 
 h1 {{
