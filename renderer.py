@@ -1038,12 +1038,12 @@ async def render(deck, out):
         key=lambda s: int(s.get("slide_number") or 0)
     )
 
-    async with async_playwright() as p:
+    async with async_playwright() as p:  
+
         browser = await p.chromium.launch(
-            executable_path="/usr/bin/chromium",
             headless=True,
             args=["--no-sandbox"],
-        )
+)       )
 
         page = await browser.new_page(
             viewport={"width": W, "height": H},
