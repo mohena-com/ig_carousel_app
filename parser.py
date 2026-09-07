@@ -19,6 +19,7 @@ IGNORED_SOURCE_TEXT = re.compile(
     r"(?:Watch Video|Download Vacancy Increase Notice|Download Syllabus|Click Here|Download Zone Wise Vacancy)",
     re.I,
 )
+IGNORED_URL_DOMAIN = re.compile(r"(?:^|//)(?:www\.)?sarkariresults?\.org(?:/|$)|(?:^|//)(?:www\.)?sarkariresult\.com(?:/|$)", re.I)
 
 
 def clean(s: str) -> str:
@@ -32,6 +33,10 @@ def is_generic(s: str) -> bool:
 
 def is_ignored_source_text(s: str) -> bool:
     return bool(IGNORED_SOURCE_TEXT.search(clean(s)))
+
+
+def is_ignored_url(url: str) -> bool:
+    return bool(IGNORED_URL_DOMAIN.search(clean(url)))
 
 
 def split_sections(text: str) -> dict[str, str]:
@@ -186,6 +191,8 @@ def parse_links(section: str):
         x=clean(raw)
         for m in URL_RE.finditer(x):
             url=m.group(0).rstrip(".,;:)]}")
+            if is_ignored_url(url):
+                continue
             before=x[:m.start()].strip(" -:")
             label="Official Notification"
             if re.search(r"Apply Online|Application",before,re.I): label="Apply Online"
@@ -272,7 +279,10 @@ def parse_job(text: str) -> JobFacts:
     links=parse_links(sections.get("OFFICIAL LINKS", ""))
     source=None
     for x in URL_RE.findall(sections.get("SOURCE", "")):
-        source=x.rstrip(".,;:)]}"); break
+        candidate=x.rstrip(".,;:)]}")
+        if not is_ignored_url(candidate):
+            source=candidate
+            break
     return JobFacts(
         organisation=org,recruitment_name=recruitment,advertisement_no=adv,total_vacancies=total,
         posts=posts,application_start=start,application_end=end,fee_payment_last_date=fee_last,
