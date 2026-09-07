@@ -78,6 +78,7 @@ def _post_card_html(card, index=0):
     label = clean_text(card.get("label")) or "Post"
     value = clean_text(card.get("value"))
     meta = clean_text(card.get("meta"))
+    count_label = "VACANCIES" if re.search(r"vacanc|post", label, re.I) else "DETAIL"
     return f"""
     <div class="post-row">
       <div class="post-index">{index + 1:02d}</div>
@@ -87,7 +88,7 @@ def _post_card_html(card, index=0):
       </div>
       <div class="post-count">
         <div class="post-count-number">{esc(value) if value else "—"}</div>
-        <div class="post-count-label">VACANCIES</div>
+        <div class="post-count-label">{count_label}</div>
       </div>
     </div>
     """
@@ -522,35 +523,40 @@ h1 {{
 
 /* POST / VACANCY LIST */
 .post-list {{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px 12px;
-  align-content:start;
+  padding:2px 10px 0 2px;
 }}
 
 .post-row {{
-  min-height:82px;
-  display:grid;
-  grid-template-columns:42px minmax(0,1fr) 72px;
-  gap:10px;
+  position:relative;
+  display:flex;
+  gap:15px;
+  min-height:76px;
+  padding:0 0 15px;
   align-items:center;
-  background:{WHITE};
-  border:1px solid {LINE};
-  border-radius:14px;
-  padding:10px 11px;
-  box-shadow:0 5px 15px rgba(11,46,89,.035);
+}}
+
+.post-row:not(:last-child):before {{
+  content:"";
+  position:absolute;
+  left:13px; top:29px; bottom:0;
+  width:2px;
+  background:{LINE};
 }}
 
 .post-index {{
-  width:34px; height:34px;
-  border-radius:10px;
-  background:{SOFT_BLUE};
-  color:{BLUE};
+  width:28px; height:28px;
+  border-radius:50%;
+  background:{NAVY};
+  color:{WHITE};
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:11px;
+  font-size:10px;
   font-weight:950;
+  border:4px solid {SOFT_BLUE};
+  flex:none;
+  position:relative;
+  z-index:1;
 }}
 
 .post-copy {{ min-width:0; }}
@@ -574,8 +580,8 @@ h1 {{
 .post-count {{
   min-width:0;
   text-align:right;
-  padding-left:7px;
-  border-left:1px solid {LINE};
+  margin-left:auto;
+  padding-left:16px;
 }}
 
 .post-count-number {{
@@ -594,34 +600,33 @@ h1 {{
 }}
 
 .post-list.compact .post-row {{
-  min-height:72px;
-  grid-template-columns:35px minmax(0,1fr) 61px;
-  padding:8px 9px;
+  min-height:66px;
+  padding-bottom:12px;
 }}
-.post-list.compact .post-index {{ width:29px; height:29px; border-radius:8px; font-size:10px; }}
+.post-list.compact .post-index {{ width:25px; height:25px; border-width:3px; font-size:9px; }}
 .post-list.compact .post-name {{ font-size:13px; }}
 .post-list.compact .post-count-number {{ font-size:18px; }}
 
-.post-list.dense {{ gap:7px 9px; }}
+.post-list.dense {{ padding-top:1px; }}
 .post-list.dense .post-row {{
-  min-height:63px;
-  grid-template-columns:31px minmax(0,1fr) 55px;
-  padding:7px 8px;
-  border-radius:11px;
+  min-height:55px;
+  gap:12px;
+  padding-bottom:10px;
 }}
-.post-list.dense .post-index {{ width:26px; height:26px; border-radius:7px; font-size:9px; }}
+.post-list.dense .post-row:not(:last-child):before {{ left:10px; top:24px; }}
+.post-list.dense .post-index {{ width:23px; height:23px; border-width:3px; font-size:8px; }}
 .post-list.dense .post-name {{ font-size:11px; line-height:1.12; }}
 .post-list.dense .post-count-number {{ font-size:16px; }}
 .post-list.dense .post-count-label {{ font-size:6px; }}
 
-.post-list.ultra-dense {{ gap:5px 7px; }}
+.post-list.ultra-dense {{ padding-top:0; }}
 .post-list.ultra-dense .post-row {{
-  min-height:54px;
-  grid-template-columns:27px minmax(0,1fr) 48px;
-  padding:5px 7px;
-  border-radius:9px;
+  min-height:47px;
+  gap:9px;
+  padding-bottom:7px;
 }}
-.post-list.ultra-dense .post-index {{ width:23px; height:23px; border-radius:6px; font-size:8px; }}
+.post-list.ultra-dense .post-row:not(:last-child):before {{ left:9px; top:20px; }}
+.post-list.ultra-dense .post-index {{ width:20px; height:20px; border-width:2px; font-size:7px; }}
 .post-list.ultra-dense .post-name {{ font-size:10px; line-height:1.08; }}
 .post-list.ultra-dense .post-count-number {{ font-size:14px; }}
 .post-list.ultra-dense .post-count-label {{ font-size:5px; }}
