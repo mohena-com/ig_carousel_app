@@ -15,6 +15,10 @@ MONTH_DATE_RE = re.compile(r"\b\d{1,2}\s+(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)
 URL_RE = re.compile(r"https?://[^\s<>\"]+")
 MONEY_RE = re.compile(r"(?:₹|Rs\.?\s*)?\d[\d,]*(?:\.\d+)?\s*/?-?", re.I)
 GENERIC = re.compile(r"^(?:not found|not available|n/?a|unknown|null|see the advertisement.*|read the notification.*)$", re.I)
+IGNORED_SOURCE_TEXT = re.compile(
+    r"(?:Watch Video|Download Vacancy Increase Notice|Download Syllabus|Click Here|Download Zone Wise Vacancy)",
+    re.I,
+)
 
 
 def clean(s: str) -> str:
@@ -24,6 +28,10 @@ def clean(s: str) -> str:
 
 def is_generic(s: str) -> bool:
     return not s or bool(GENERIC.match(clean(s)))
+
+
+def is_ignored_source_text(s: str) -> bool:
+    return bool(IGNORED_SOURCE_TEXT.search(clean(s)))
 
 
 def split_sections(text: str) -> dict[str, str]:
@@ -193,12 +201,12 @@ def parse_eligibility_sections(elig: str):
     lines=[clean(x) for x in elig.splitlines() if clean(x)]
     heads=[]
     for i,x in enumerate(lines):
-        if re.search(r"Eligibility with Code|Eligibility Criteria",x,re.I) and not re.search(r"More Eligibility",x,re.I):
+        if re.search(r"Eligibility with Code|Eligibility Criteria|Eligibility Details",x,re.I) and not re.search(r"More Eligibility",x,re.I):
             heads.append((i,x))
     cards=[]
     for n,(i,h) in enumerate(heads):
         j=heads[n+1][0] if n+1<len(heads) else len(lines)
-        body=clean(" ".join(lines[i+1:j]))
+        body=clean(" ".join(x for x in lines[i+1:j] if not is_ignored_source_text(x)))
         body=re.sub(r"\s*More Eligibility.*$","",body,flags=re.I).strip()
         if body: cards.append((h,body))
     return cards
@@ -246,12 +254,12 @@ def parse_job(text: str) -> JobFacts:
     for x in sections.get("SELECTION PROCESS","").splitlines():
         x=clean(x)
         if x.startswith("-"): x=clean(x.lstrip("-• "))
-        if x and x.lower() not in {clean(org or "").lower(),clean(recruitment or "").lower()} and not re.search(r"Online Form|Short Details|Advt\.?\s*No|Age Relaxation",x,re.I) and not is_generic(x) and not re.search(r"Short Details|Organisation|See the advertisement|Read the notification",x,re.I): selection.append(x)
+        if x and not is_ignored_source_text(x) and x.lower() not in {clean(org or "").lower(),clean(recruitment or "").lower()} and not re.search(r"Online Form|Short Details|Advt\.?\s*No|Age Relaxation",x,re.I) and not is_generic(x) and not re.search(r"Short Details|Organisation|See the advertisement|Read the notification",x,re.I): selection.append(x)
     salary=None; stipend=None
     for x in sections.get("PAY / SALARY","").splitlines():
         x=clean(x)
         if x.startswith("-"): x=clean(x.lstrip("-• "))
-        if x and x.lower() not in {clean(org or "").lower(),clean(recruitment or "").lower()} and not re.search(r"Online Form|Short Details|Advt\.?\s*No|Age Relaxation",x,re.I) and not is_generic(x) and not re.search(r"Short Details|Organisation|See the advertisement|Read the notification",x,re.I):
+        if x and not is_ignored_source_text(x) and x.lower() not in {clean(org or "").lower(),clean(recruitment or "").lower()} and not re.search(r"Online Form|Short Details|Advt\.?\s*No|Age Relaxation",x,re.I) and not is_generic(x) and not re.search(r"Short Details|Organisation|See the advertisement|Read the notification",x,re.I):
             if re.search(r"stipend",x,re.I): stipend=x
             else: salary=x
             break
@@ -259,7 +267,7 @@ def parse_job(text: str) -> JobFacts:
     for x in how.splitlines():
         x=clean(x)
         if x.startswith("-"): x=clean(x.lstrip("-• "))
-        if x and not re.search(r"How to Fill|Sarkari Result|Candidate Can Apply|Notification.*Form 2026|\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\s+to\s+\d",x,re.I):
+        if x and not is_ignored_source_text(x) and not re.search(r"How to Fill|Sarkari Result|Candidate Can Apply|Notification.*Form 2026|\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\s+to\s+\d",x,re.I):
             steps.append(x)
     links=parse_links(sections.get("OFFICIAL LINKS", ""))
     source=None

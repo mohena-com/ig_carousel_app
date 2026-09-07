@@ -39,6 +39,10 @@ def make_deck(f: JobFacts):
         fallback=[]
         if total is not None: fallback.append(c("Total vacancies",f"{total:,}"))
         if f.advertisement_no: fallback.append(c("Advertisement",f.advertisement_no))
+        if f.recruitment_name: fallback.append(c("Recruitment",f.recruitment_name))
+        if f.application_start and f.application_end:
+            fallback.append(c("Application window",f"{f.application_start} → {f.application_end}"))
+        if not fallback: fallback.append(c("Post details","See the official notification"))
         slides.append(IGSlide(slide_number=2,slide_type="posts",title="Recruitment Snapshot",eyebrow=org,cards=fallback))
 
     elig_cards=[c(p.name,p.qualification,p.experience) for p in f.posts if p.qualification]
@@ -48,7 +52,9 @@ def make_deck(f: JobFacts):
     first_elig=elig_cards[:7] if split else elig_cards
     rest_elig=elig_cards[7:] if split else []
     if not first_elig:
-        blocks=parse_eligibility_sections(f.raw_sections.get("ELIGIBILITY", "") + "\n" + f.raw_sections.get("APPLICATION FEE", ""))
+        blocks=[]
+        for section in ("ELIGIBILITY", "KEY INFORMATION"):
+            blocks.extend(parse_eligibility_sections(f.raw_sections.get(section, "")))
         for h,b in blocks[:4]:
             # Preserve alternatives as separate compact cards instead of one
             # giant paragraph. This is especially useful for CTET-style data.
@@ -66,6 +72,8 @@ def make_deck(f: JobFacts):
             for idx,clause in enumerate(expanded):
                 first_elig.append(c(f"{h.split(':')[0]} • Option {idx+1}",clause))
         if f.age_limit: first_elig.append(c("Age limit",f.age_limit,f.age_relaxation))
+    if not first_elig:
+        first_elig.append(c("Eligibility","See the official notification for eligibility details"))
     # Fallback eligibility (e.g. CTET) can also create many cards. Split it
     # before rendering so no content is clipped.
     if not split and len(first_elig)>7:
@@ -89,7 +97,13 @@ def make_deck(f: JobFacts):
     else:
         if not admin:
             for x in f.application_steps[:5]: admin.append(c("Application step",x))
-        slides.append(IGSlide(slide_number=4,slide_type="fees",title="Fees • Age • Selection • Pay",eyebrow=org,cards=admin,footer_note="Only information available in the source is shown." if admin else None))
+        admin_topics=[]
+        if f.fees: admin_topics.append("Fees")
+        if f.age_limit: admin_topics.append("Age")
+        if f.selection_process: admin_topics.append("Selection")
+        if f.salary or f.stipend: admin_topics.append("Pay")
+        if not admin_topics: admin_topics.append("Details")
+        slides.append(IGSlide(slide_number=4,slide_type="fees",title=" • ".join(admin_topics),eyebrow=org,cards=admin,footer_note="Only information available in the source is shown." if admin else None))
 
     dates=[]
     if f.application_start: dates.append(c("Application starts",f.application_start))
