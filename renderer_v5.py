@@ -112,6 +112,24 @@ def _snapshot_card_html(card, index=0):
     """
 
 
+def _eligibility_card_html(card, index=0, compact=False):
+    """Compact post-wise eligibility card that keeps all supplied text visible."""
+    label = clean_text(card.get("label")) or "Post"
+    value = clean_text(card.get("value"))
+    meta = clean_text(card.get("meta"))
+    cls = "eligibility-card eligibility-card-compact" if compact else "eligibility-card"
+    return f"""
+    <article class="{cls}">
+      <div class="eligibility-card-head">
+        <span class="card-dot"></span>
+        <span class="eligibility-code">{esc(label)}</span>
+      </div>
+      <div class="eligibility-value">{esc(value) if value else "—"}</div>
+      {f'<div class="eligibility-meta">{esc(meta)}</div>' if meta else ""}
+    </article>
+    """
+
+
 def _fee_card_html(card, index=0, primary=False):
     """Financial card with stronger visual hierarchy for fee information."""
     label = clean_text(card.get("label")) or "Details"
@@ -285,26 +303,46 @@ def build_html(slide, total, theme="professional_white"):
         )
 
         hero_bullets = "".join(
-            f'<div class="hero-point"><span></span>{esc(x)}</div>'
-            for x in bullets[:3]
+            f"""
+            <div class="hero-point {'hero-point-feature' if i == 0 else ''}">
+              <span class="hero-point-mark">{'✓' if i == 0 else '•'}</span>
+              <div class="hero-point-copy">{esc(x)}</div>
+            </div>
+            """
+            for i, x in enumerate(bullets[:3])
         )
 
         hero = f"""
         <section class="hero">
           <div class="hero-grid"></div>
 
-          {f"""
-          <div class="hero-stat">
-            <div class="hero-stat-number">{esc(metric)}</div>
-            <!-- small duplicate vacancy label removed -->
+          <div class="hero-kicker-row">
+            <span class="hero-kicker">RECRUITMENT HIGHLIGHTS</span>
+            {f'<span class="hero-count">{esc(metric)} VACANCIES</span>' if metric else ""}
           </div>
-          """ if metric else ""}
 
-          {f"""
-          <div class="hero-points">
-            {hero_bullets}
+          <div class="hero-main">
+            {f"""
+            <div class="hero-stat">
+              <div class="hero-stat-number">{esc(metric)}</div>
+              <div class="hero-stat-caption">OPEN<br>POSITIONS</div>
+            </div>
+            """ if metric else ""}
+
+            {f"""
+            <div class="hero-points">
+              {hero_bullets}
+            </div>
+            """ if hero_bullets else ""}
           </div>
-          """ if hero_bullets else ""}
+
+          <div class="hero-callout">
+            <div class="hero-callout-icon">→</div>
+            <div>
+              <div class="hero-callout-title">YOUR APPLICATION STARTS HERE</div>
+              <div class="hero-callout-text">Check the following slides for post-wise details, eligibility, dates and application information.</div>
+            </div>
+          </div>
 
           <div class="hero-bottom">
             <span>SWIPE FOR POSTS • ELIGIBILITY • DATES • APPLICATION</span>
@@ -323,14 +361,24 @@ def build_html(slide, total, theme="professional_white"):
             body = f'<div class="snapshot-grid">{snapshot_html}</div>'
 
         elif stype == "eligibility":
-            # A single eligibility fact should look intentional, not like
-            # an undersized generic card floating in a large empty canvas.
-            eligibility_cards = "".join(
-                _card_html(card, i) for i, card in enumerate(cards)
+            # Post-wise eligibility can contain many long qualifications.
+            # Use a responsive 2-column card layout so all supplied content
+            # stays inside the 1080x1350 canvas instead of stacking forever.
+            eligibility_count = len(cards)
+            compact = eligibility_count >= 4
+            eligibility_density = (
+                "eligibility-many" if eligibility_count >= 6
+                else "eligibility-medium" if eligibility_count >= 4
+                else "eligibility-few"
             )
+            eligibility_cards = "".join(
+                _eligibility_card_html(card, i, compact=compact)
+                for i, card in enumerate(cards)
+            )
+
             body = f"""
-            <div class="eligibility-layout">
-              <div class="eligibility-panel">
+            <div class="eligibility-layout {eligibility_density}">
+              <div class="eligibility-grid">
                 {eligibility_cards}
               </div>
             </div>
@@ -380,13 +428,54 @@ def build_html(slide, total, theme="professional_white"):
             """
 
         elif stype == "links":
+            checklist_cards = "".join(
+                f"""
+                <div class="apply-check-card">
+                  <div class="apply-check-number">{i + 1:02d}</div>
+                  <div class="apply-check-text">{esc(x)}</div>
+                </div>
+                """
+                for i, x in enumerate(bullets)
+            )
+
+            checklist_section = ""
+            if checklist_cards:
+                checklist_section = f"""
+                <section class="apply-section">
+                  <div class="apply-section-head">
+                    <div>
+                      <div class="section-kicker">APPLICATION CHECKLIST</div>
+                      <div class="apply-section-title">Before You Apply</div>
+                    </div>
+                    <div class="apply-section-note">Read • Prepare • Review</div>
+                  </div>
+                  <div class="apply-check-grid">{checklist_cards}</div>
+                </section>
+                """
+
+            first_url = (
+                clean_text(url_cards[0].get("value"))
+                if url_cards else ""
+            )
+
             body = f"""
-            <div class="links-composition">
-              <section class="links-panel">
-                <div class="section-kicker">OFFICIAL SOURCE</div>
-                <div class="links-wrap {density}">{cards_html}</div>
+            <div class="links-v3">
+              <section class="official-cta">
+                <div class="official-cta-copy">
+                  <div class="section-kicker">OFFICIAL NOTIFICATION</div>
+                  <div class="official-cta-title">
+                    Scan the QR code to open the official recruitment notification
+                  </div>
+                  <div class="official-cta-url">{esc(first_url)}</div>
+                  <div class="official-cta-badge">
+                    VERIFY DETAILS BEFORE APPLYING
+                  </div>
+                </div>
+                <div class="official-cta-qr">
+                  {cards_html}
+                </div>
               </section>
-              {_checklist_panel_html(bullets, "BEFORE YOU APPLY")}
+              {checklist_section}
             </div>
             """
 
@@ -751,41 +840,108 @@ h1 {{
   width:100%;
 }}
 
-.eligibility-panel {{
-  background:{SOFT};
+.eligibility-grid {{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:15px;
+  align-items:stretch;
+}}
+
+.eligibility-card {{
+  min-height:150px;
+  background:{WHITE};
   border:1px solid {LINE};
-  border-left:6px solid {BLUE};
-  border-radius:20px;
-  padding:24px 26px;
-  box-shadow:0 10px 28px rgba(11,46,89,.055);
+  border-left:5px solid {BLUE};
+  border-radius:17px;
+  padding:18px 18px 17px;
+  box-shadow:0 7px 20px rgba(11,46,89,.05);
+  overflow:hidden;
 }}
 
-.eligibility-panel .info-card {{
-  min-height:185px;
-  border:0;
-  border-radius:0;
-  padding:0;
-  background:transparent;
-  box-shadow:none;
+.eligibility-card-head {{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  margin-bottom:9px;
 }}
 
-.eligibility-panel .card-top {{
-  margin-bottom:12px;
+.eligibility-code {{
+  color:{BLUE};
+  font-size:11px;
+  line-height:1;
+  font-weight:950;
+  letter-spacing:.55px;
+  text-transform:uppercase;
 }}
 
-.eligibility-panel .label {{
-  font-size:12px;
-}}
-
-.eligibility-panel .value {{
-  font-size:31px;
+.eligibility-value {{
+  color:{INK};
+  font-size:21px;
   line-height:1.18;
-  max-width:820px;
+  font-weight:800;
+  overflow-wrap:anywhere;
 }}
 
-.eligibility-panel .meta {{
-  font-size:15px;
-  margin-top:12px;
+.eligibility-meta {{
+  color:{MUTED};
+  font-size:12px;
+  line-height:1.25;
+  margin-top:7px;
+  overflow-wrap:anywhere;
+}}
+
+.eligibility-few .eligibility-grid {{
+  grid-template-columns:1fr;
+  gap:16px;
+}}
+
+.eligibility-few .eligibility-card {{
+  min-height:185px;
+  padding:23px 25px;
+}}
+
+.eligibility-few .eligibility-value {{
+  font-size:29px;
+  line-height:1.17;
+  max-width:880px;
+}}
+
+.eligibility-medium .eligibility-card {{
+  min-height:155px;
+  padding:17px 18px;
+}}
+
+.eligibility-medium .eligibility-value {{
+  font-size:19px;
+  line-height:1.17;
+}}
+
+.eligibility-many .eligibility-grid {{
+  gap:13px;
+}}
+
+.eligibility-many .eligibility-card {{
+  min-height:146px;
+  padding:15px 16px 14px;
+  border-radius:15px;
+}}
+
+.eligibility-many .eligibility-card-head {{
+  margin-bottom:7px;
+}}
+
+.eligibility-many .eligibility-code {{
+  font-size:10px;
+}}
+
+.eligibility-many .eligibility-value {{
+  font-size:18px;
+  line-height:1.17;
+}}
+
+.eligibility-many .eligibility-meta {{
+  font-size:11px;
+  margin-top:5px;
 }}
 
 .eligibility-checklist {{
@@ -1010,62 +1166,195 @@ h1 {{
 }}
 
 /* SLIDE 6 — OFFICIAL LINKS + CHECKLIST */
-.links-composition {{
-  display:grid;
-  grid-template-columns:1.35fr 0.95fr;
-  gap:18px;
-  align-items:stretch;
+.links-v3 {{
+  display:flex;
+  flex-direction:column;
+  gap:20px;
 }}
 
-.links-panel {{
+.official-cta {{
+  position:relative;
+  min-height:250px;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 190px;
+  gap:25px;
+  align-items:center;
+  background:{NAVY};
+  border-radius:24px;
+  padding:27px 30px;
+  overflow:hidden;
+  box-shadow:0 14px 32px rgba(11,46,89,.15);
+}}
+
+.official-cta:before {{
+  content:"";
+  position:absolute;
+  right:-105px;
+  top:-125px;
+  width:330px;
+  height:330px;
+  border:30px solid rgba(255,255,255,.07);
+  border-radius:50%;
+}}
+
+.official-cta:after {{
+  content:"";
+  position:absolute;
+  left:-80px;
+  bottom:-115px;
+  width:230px;
+  height:230px;
+  border:22px solid rgba(228,165,28,.10);
+  border-radius:50%;
+}}
+
+.official-cta-copy {{
+  position:relative;
+  z-index:2;
+  min-width:0;
+}}
+
+.official-cta .section-kicker {{
+  color:{GOLD};
+}}
+
+.official-cta-title {{
+  color:{WHITE};
+  font-size:30px;
+  line-height:1.12;
+  font-weight:900;
+  letter-spacing:-.5px;
+  max-width:610px;
+  margin-top:13px;
+}}
+
+.official-cta-url {{
+  color:#BCD7EA;
+  font-size:12px;
+  line-height:1.35;
+  margin-top:12px;
+  max-width:610px;
+  overflow-wrap:anywhere;
+}}
+
+.official-cta-badge {{
+  display:inline-flex;
+  margin-top:17px;
+  padding:8px 12px;
+  border-radius:999px;
+  background:{GOLD};
+  color:{NAVY};
+  font-size:9px;
+  line-height:1;
+  font-weight:950;
+  letter-spacing:.7px;
+}}
+
+.official-cta-qr {{
+  position:relative;
+  z-index:2;
+}}
+
+.official-cta .link-card {{
+  display:block;
+  margin:0;
+  padding:10px;
+  background:{WHITE};
+  border:0;
+  border-radius:17px;
+  box-shadow:0 10px 25px rgba(0,0,0,.14);
+}}
+
+.official-cta .link-copy {{
+  display:none;
+}}
+
+.official-cta .qr-wrap {{
+  padding:5px;
+  border:0;
+  border-radius:10px;
+  background:{WHITE};
+}}
+
+.official-cta .qr-wrap img {{
+  width:160px;
+  height:160px;
+  display:block;
+}}
+
+.apply-section {{
   background:{SOFT};
   border:1px solid {LINE};
-  border-radius:20px;
-  padding:21px 22px;
+  border-radius:22px;
+  padding:22px 24px 24px;
   box-shadow:0 8px 24px rgba(11,46,89,.045);
 }}
 
-.links-panel .links-wrap {{
-  margin-top:20px;
-}}
-
-.link-card {{
-  display:grid;
-  grid-template-columns:minmax(0,1fr) 132px;
+.apply-section-head {{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
   gap:20px;
-  align-items:center;
-  background:{WHITE};
-  border:1px solid {LINE};
-  border-radius:17px;
-  padding:19px;
-  margin-bottom:12px;
-  box-shadow:0 6px 18px rgba(11,46,89,.04);
 }}
 
-.link-title {{
+.apply-section-title {{
   color:{NAVY};
-  font-size:25px;
-  line-height:1.12;
+  font-size:27px;
+  line-height:1.05;
   font-weight:900;
+  margin-top:7px;
 }}
 
-.url {{
+.apply-section-note {{
   color:{MUTED};
-  font-size:12px;
-  line-height:1.3;
-  overflow-wrap:anywhere;
-  margin-top:8px;
+  font-size:11px;
+  line-height:1;
+  font-weight:800;
+  letter-spacing:.4px;
+  white-space:nowrap;
 }}
 
-.qr-wrap {{
+.apply-check-grid {{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:11px 13px;
+  margin-top:18px;
+}}
+
+.apply-check-card {{
+  min-height:86px;
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
   background:{WHITE};
-  padding:8px;
-  border-radius:13px;
   border:1px solid {LINE};
+  border-radius:15px;
+  padding:14px 15px;
 }}
 
-.qr-wrap img {{ width:114px; height:114px; display:block; }}
+.apply-check-number {{
+  width:28px;
+  height:28px;
+  border-radius:50%;
+  flex:none;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:{SOFT_BLUE};
+  color:{BLUE};
+  font-size:9px;
+  font-weight:950;
+}}
 
+.apply-check-text {{
+  color:{INK};
+  font-size:15px;
+  line-height:1.28;
+  font-weight:700;
+  overflow-wrap:anywhere;
+}}
+
+/* Existing link-list fallback for additional URLs */
 .link-list {{
   background:{WHITE};
   border:1px solid {LINE};
@@ -1079,34 +1368,21 @@ h1 {{
 .link-row .url {{ margin-top:0; }}
 
 .links-wrap.dense .link-card {{
-  grid-template-columns:minmax(0,1fr) 102px;
-  gap:13px;
-  padding:13px;
+  grid-template-columns:minmax(0,1fr) 96px;
+  gap:12px;
+  padding:12px;
 }}
-.links-wrap.dense .qr-wrap img {{ width:88px; height:88px; }}
-.links-wrap.dense .link-title {{ font-size:19px; }}
+.links-wrap.dense .qr-wrap img {{ width:82px; height:82px; }}
+.links-wrap.dense .link-title {{ font-size:17px; }}
 
 .links-wrap.ultra-dense .link-card {{
-  grid-template-columns:minmax(0,1fr) 86px;
-  gap:10px;
-  padding:10px;
+  grid-template-columns:minmax(0,1fr) 82px;
+  gap:9px;
+  padding:9px;
 }}
-.links-wrap.ultra-dense .qr-wrap img {{ width:72px; height:72px; }}
-.links-wrap.ultra-dense .link-title {{ font-size:15px; }}
+.links-wrap.ultra-dense .qr-wrap img {{ width:68px; height:68px; }}
+.links-wrap.ultra-dense .link-title {{ font-size:14px; }}
 .links-wrap.ultra-dense .url {{ font-size:9px; }}
-
-.links-composition .checklist-panel {{
-  min-height:100%;
-}}
-
-.links-composition .checklist-panel .bullet-list {{
-  gap:15px;
-}}
-
-.links-composition .checklist-panel .bullet-list li {{
-  font-size:16px;
-  line-height:1.3;
-}}
 
 /* FALLBACK CONTENT */
 .content-block.eligibility .info-card {{ border-left:4px solid {BLUE}; }}
@@ -1122,7 +1398,7 @@ h1 {{
   overflow:hidden;
   border-radius:28px;
   background:{NAVY};
-  padding:37px 40px 30px;
+  padding:32px 40px 30px;
   color:{WHITE};
   box-shadow:0 18px 40px rgba(11,46,89,.17);
 }}
@@ -1130,33 +1406,33 @@ h1 {{
 .hero:before {{
   content:"";
   position:absolute;
-  width:440px; height:440px;
-  right:-225px; top:-235px;
-  border:45px solid rgba(255,255,255,.065);
+  width:470px; height:470px;
+  right:-245px; top:-250px;
+  border:46px solid rgba(255,255,255,.065);
   border-radius:50%;
 }}
 
 .hero:after {{
   content:"";
   position:absolute;
-  width:260px; height:260px;
-  left:-185px; bottom:-170px;
-  border:34px solid rgba(228,165,28,.12);
+  width:285px; height:285px;
+  left:-190px; bottom:-190px;
+  border:36px solid rgba(228,165,28,.12);
   border-radius:50%;
 }}
 
 .hero-grid {{
   position:absolute;
   inset:0;
-  opacity:.16;
+  opacity:.13;
   background-image:
     linear-gradient(rgba(255,255,255,.18) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255,255,255,.18) 1px, transparent 1px);
   background-size:44px 44px;
-  mask-image:linear-gradient(to bottom right, black, transparent 62%);
+  mask-image:linear-gradient(to bottom right, black, transparent 68%);
 }}
 
-.hero-topline {{
+.hero-kicker-row {{
   position:relative;
   z-index:2;
   display:flex;
@@ -1164,48 +1440,37 @@ h1 {{
   align-items:center;
 }}
 
-.hero-tag {{
+.hero-kicker {{
+  display:inline-flex;
+  align-items:center;
+  padding:8px 11px;
+  border:1px solid rgba(228,165,28,.38);
+  border-radius:999px;
   color:{GOLD};
-  font-size:12px;
+  font-size:10px;
   line-height:1;
   font-weight:950;
-  letter-spacing:1.4px;
+  letter-spacing:1.2px;
 }}
 
-.hero-year {{
-  color:rgba(255,255,255,.65);
-  font-size:12px;
+.hero-count {{
+  color:rgba(255,255,255,.72);
+  font-size:11px;
+  line-height:1;
   font-weight:900;
-  letter-spacing:1px;
+  letter-spacing:.8px;
 }}
 
-.hero-title {{
+.hero-main {{
   position:relative;
   z-index:2;
-  margin-top:29px;
-  color:{WHITE};
-  font-size:49px;
-  line-height:1.02;
-  letter-spacing:-1.8px;
-  font-weight:950;
-  max-width:820px;
-}}
-
-.hero-org {{
-  position:relative;
-  z-index:2;
-  margin-top:14px;
-  color:#BCD7EA;
-  font-size:18px;
-  line-height:1.25;
-  font-weight:700;
-  max-width:760px;
+  min-height:315px;
+  margin-top:34px;
+  display:flex;
+  flex-direction:column;
 }}
 
 .hero-stat {{
-  position:relative;
-  z-index:2;
-  margin-top:38px;
   display:flex;
   align-items:flex-end;
   gap:14px;
@@ -1213,48 +1478,118 @@ h1 {{
 
 .hero-stat-number {{
   color:{WHITE};
-  font-size:112px;
+  font-size:108px;
   line-height:.78;
   font-weight:950;
   letter-spacing:-5px;
 }}
 
-.hero-stat-label {{
+.hero-stat-caption {{
   color:{GOLD};
-  font-size:16px;
+  font-size:14px;
   line-height:1.05;
   font-weight:950;
-  letter-spacing:1.3px;
+  letter-spacing:1.2px;
   padding-bottom:5px;
-  max-width:160px;
 }}
 
 .hero-points {{
-  position:relative;
-  z-index:2;
-  margin-top:40px;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-  max-width:760px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:13px;
+  margin-top:30px;
+  max-width:890px;
 }}
 
 .hero-point {{
+  min-height:76px;
   display:flex;
   align-items:flex-start;
-  gap:10px;
+  gap:12px;
+  padding:15px 16px;
+  background:rgba(255,255,255,.055);
+  border:1px solid rgba(255,255,255,.11);
+  border-radius:15px;
   color:{WHITE};
-  font-size:17px;
-  line-height:1.28;
-  font-weight:650;
 }}
 
-.hero-point span {{
-  width:7px; height:7px;
-  margin-top:7px;
-  border-radius:50%;
-  background:{GOLD};
+.hero-point-feature {{
+  grid-column:1 / -1;
+  min-height:102px;
+  background:rgba(255,255,255,.095);
+  border:1px solid rgba(228,165,28,.42);
+  box-shadow:inset 4px 0 0 {GOLD};
+}}
+
+.hero-point-mark {{
+  width:26px;
+  height:26px;
   flex:none;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(228,165,28,.15);
+  color:{GOLD};
+  font-size:13px;
+  font-weight:950;
+}}
+
+.hero-point-copy {{
+  color:{WHITE};
+  font-size:16px;
+  line-height:1.28;
+  font-weight:700;
+  overflow-wrap:anywhere;
+}}
+
+.hero-point-feature .hero-point-copy {{
+  font-size:22px;
+  line-height:1.2;
+  font-weight:850;
+  padding-top:2px;
+}}
+
+.hero-callout {{
+  position:relative;
+  z-index:2;
+  display:flex;
+  align-items:center;
+  gap:14px;
+  margin-top:17px;
+  max-width:890px;
+  padding:16px 18px;
+  border-radius:17px;
+  background:{GOLD};
+  color:{NAVY};
+}}
+
+.hero-callout-icon {{
+  width:34px;
+  height:34px;
+  border-radius:50%;
+  flex:none;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:{NAVY};
+  color:{GOLD};
+  font-size:21px;
+  font-weight:900;
+}}
+
+.hero-callout-title {{
+  font-size:11px;
+  line-height:1;
+  font-weight:950;
+  letter-spacing:.9px;
+}}
+
+.hero-callout-text {{
+  font-size:12px;
+  line-height:1.25;
+  font-weight:700;
+  margin-top:5px;
 }}
 
 .hero-bottom {{
@@ -1273,7 +1608,11 @@ h1 {{
   letter-spacing:.8px;
 }}
 
-.hero-arrow {{ color:{GOLD}; font-size:24px; line-height:1; }}
+.hero-arrow {{
+  color:{GOLD};
+  font-size:24px;
+  line-height:1;
+}}
 
 /* FOOTER */
 footer {{

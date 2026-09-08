@@ -219,7 +219,60 @@ def _normalise_type(stype):
     return aliases.get(s, s or "content")
 
 
-def build_html(slide, total, theme="professional_white"):
+
+def _extract_vacancy_total(deck):
+    """
+    Find the most explicit total-vacancy value anywhere in the deck.
+    This lets Slide 1 show the same authoritative total used elsewhere,
+    even when Slide 1 itself has no vacancy card.
+    """
+    candidates = []
+
+    for slide in (deck.get("slides") or []):
+        for card in (slide.get("cards") or []):
+            if not isinstance(card, dict):
+                continue
+
+            label = clean_text(card.get("label")).lower()
+            value = clean_text(card.get("value"))
+
+            if not value:
+                continue
+
+            if any(term in label for term in (
+                "total vacancies",
+                "total vacancy",
+                "vacancies",
+                "vacancy",
+            )):
+                candidates.append(value)
+
+    # Prefer an explicit "total vacancies" label.
+    for slide in (deck.get("slides") or []):
+        for card in (slide.get("cards") or []):
+            if not isinstance(card, dict):
+                continue
+            label = clean_text(card.get("label")).lower()
+            value = clean_text(card.get("value"))
+            if value and "total vacancies" in label:
+                return value
+
+    return candidates[0] if candidates else ""
+
+
+def _extract_application_highlight(bullets):
+    """Use the supplied application/date bullet without inventing dates."""
+    for bullet in bullets:
+        b = clean_text(bullet)
+        if not b:
+            continue
+        if re.search(r"\bapplications?\b", b, re.I) or re.search(
+            r"\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b", b
+        ):
+            return b
+    return ""
+
+def build_html(slide, total, theme="professional_white", total_vacancies=""):
     """
     Existing deck contract from carousel.py:
       slide_number, slide_type, title, eyebrow, subtitle,
@@ -296,20 +349,24 @@ def build_html(slide, total, theme="professional_white"):
 
     hero = ""
     if stype == "hook":
-        metric = clean_text(cards[0].get("value")) if cards else ""
-        metric_label = (
-            clean_text(cards[0].get("label")).upper()
-            if cards else "VACANCIES"
-        )
+        # Slide 1 gets the authoritative total from the complete deck.
+        metric = clean_text(total_vacancies)
 
-        hero_bullets = "".join(
+        application_highlight = _extract_application_highlight(bullets)
+
+        remaining_bullets = [
+            b for b in bullets
+            if clean_text(b) != clean_text(application_highlight)
+        ]
+
+        hero_points = "".join(
             f"""
-            <div class="hero-point {'hero-point-feature' if i == 0 else ''}">
-              <span class="hero-point-mark">{'✓' if i == 0 else '•'}</span>
-              <div class="hero-point-copy">{esc(x)}</div>
+            <div class="hero-info-card">
+              <div class="hero-info-icon">{'✓' if i == 0 else '•'}</div>
+              <div class="hero-info-text">{esc(x)}</div>
             </div>
             """
-            for i, x in enumerate(bullets[:3])
+            for i, x in enumerate(remaining_bullets[:3])
         )
 
         hero = f"""
@@ -318,22 +375,28 @@ def build_html(slide, total, theme="professional_white"):
 
           <div class="hero-kicker-row">
             <span class="hero-kicker">RECRUITMENT HIGHLIGHTS</span>
-            {f'<span class="hero-count">{esc(metric)} VACANCIES</span>' if metric else ""}
+            {f'<span class="hero-count">TOTAL VACANCIES</span>' if metric else ""}
           </div>
 
           <div class="hero-main">
             {f"""
-            <div class="hero-stat">
-              <div class="hero-stat-number">{esc(metric)}</div>
-              <div class="hero-stat-caption">OPEN<br>POSITIONS</div>
+            <div class="hero-vacancy-block">
+              <div class="hero-vacancy-label">TOTAL VACANCIES</div>
+              <div class="hero-vacancy-row">
+                <div class="hero-stat-number">{esc(metric)}</div>
+                <div class="hero-stat-caption">OPEN<br>POSITIONS</div>
+              </div>
             </div>
             """ if metric else ""}
 
             {f"""
-            <div class="hero-points">
-              {hero_bullets}
+            <div class="hero-date-pill">
+              <span class="hero-date-icon">▣</span>
+              <span>{esc(application_highlight)}</span>
             </div>
-            """ if hero_bullets else ""}
+            """ if application_highlight else ""}
+
+            {f'<div class="hero-info-grid">{hero_points}</div>' if hero_points else ""}
           </div>
 
           <div class="hero-callout">
@@ -1444,7 +1507,7 @@ h1 {{
   display:inline-flex;
   align-items:center;
   padding:8px 11px;
-  border:1px solid rgba(228,165,28,.38);
+  border:1px solid rgba(228,165,28,.42);
   border-radius:999px;
   color:{GOLD};
   font-size:10px;
@@ -1454,26 +1517,36 @@ h1 {{
 }}
 
 .hero-count {{
-  color:rgba(255,255,255,.72);
-  font-size:11px;
+  color:{GOLD};
+  font-size:10px;
   line-height:1;
-  font-weight:900;
-  letter-spacing:.8px;
+  font-weight:950;
+  letter-spacing:1px;
 }}
 
 .hero-main {{
   position:relative;
   z-index:2;
-  min-height:315px;
-  margin-top:34px;
-  display:flex;
-  flex-direction:column;
+  margin-top:28px;
 }}
 
-.hero-stat {{
+.hero-vacancy-block {{
+  display:inline-block;
+}}
+
+.hero-vacancy-label {{
+  color:#D7E5F0;
+  font-size:12px;
+  line-height:1;
+  font-weight:950;
+  letter-spacing:3px;
+  margin-bottom:13px;
+}}
+
+.hero-vacancy-row {{
   display:flex;
   align-items:flex-end;
-  gap:14px;
+  gap:15px;
 }}
 
 .hero-stat-number {{
@@ -1490,75 +1563,91 @@ h1 {{
   line-height:1.05;
   font-weight:950;
   letter-spacing:1.2px;
-  padding-bottom:5px;
+  padding-bottom:6px;
 }}
 
-.hero-points {{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:13px;
-  margin-top:30px;
+.hero-date-pill {{
+  width:max-content;
   max-width:890px;
-}}
-
-.hero-point {{
-  min-height:76px;
   display:flex;
-  align-items:flex-start;
-  gap:12px;
-  padding:15px 16px;
+  align-items:center;
+  gap:13px;
+  margin-top:27px;
+  padding:13px 18px;
+  border:1px solid rgba(255,255,255,.24);
+  border-radius:999px;
   background:rgba(255,255,255,.055);
-  border:1px solid rgba(255,255,255,.11);
-  border-radius:15px;
   color:{WHITE};
+  font-size:16px;
+  line-height:1.15;
+  font-weight:750;
 }}
 
-.hero-point-feature {{
-  grid-column:1 / -1;
-  min-height:102px;
-  background:rgba(255,255,255,.095);
-  border:1px solid rgba(228,165,28,.42);
-  box-shadow:inset 4px 0 0 {GOLD};
-}}
-
-.hero-point-mark {{
-  width:26px;
-  height:26px;
-  flex:none;
+.hero-date-icon {{
+  width:34px;
+  height:34px;
   border-radius:50%;
+  flex:none;
   display:flex;
   align-items:center;
   justify-content:center;
-  background:rgba(228,165,28,.15);
-  color:{GOLD};
-  font-size:13px;
+  background:{WHITE};
+  color:{NAVY};
+  font-size:15px;
   font-weight:950;
 }}
 
-.hero-point-copy {{
+.hero-info-grid {{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+  max-width:890px;
+  margin-top:22px;
+}}
+
+.hero-info-card {{
+  min-height:72px;
+  display:flex;
+  align-items:flex-start;
+  gap:11px;
+  padding:14px 15px;
+  border:1px solid rgba(255,255,255,.13);
+  border-radius:15px;
+  background:rgba(255,255,255,.065);
+}}
+
+.hero-info-icon {{
+  width:25px;
+  height:25px;
+  border-radius:50%;
+  flex:none;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(228,165,28,.17);
+  color:{GOLD};
+  font-size:12px;
+  font-weight:950;
+}}
+
+.hero-info-text {{
   color:{WHITE};
-  font-size:16px;
-  line-height:1.28;
+  font-size:14px;
+  line-height:1.25;
   font-weight:700;
   overflow-wrap:anywhere;
 }}
 
-.hero-point-feature .hero-point-copy {{
-  font-size:22px;
-  line-height:1.2;
-  font-weight:850;
-  padding-top:2px;
-}}
-
 .hero-callout {{
-  position:relative;
+  position:absolute;
   z-index:2;
+  left:40px;
+  right:40px;
+  bottom:73px;
   display:flex;
   align-items:center;
   gap:14px;
-  margin-top:17px;
-  max-width:890px;
-  padding:16px 18px;
+  padding:15px 18px;
   border-radius:17px;
   background:{GOLD};
   color:{NAVY};
@@ -1716,12 +1805,13 @@ async def render(deck, out):
         )
 
         total = len(slides)
+        vacancy_total = _extract_vacancy_total(deck)
 
         for s in slides:
             slide_no = int(s.get("slide_number") or 1)
 
             await page.set_content(
-                build_html(s, total),
+                build_html(s, total, total_vacancies=vacancy_total),
                 wait_until="load",
             )
 
