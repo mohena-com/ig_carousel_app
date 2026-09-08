@@ -293,10 +293,6 @@ def build_html(slide, total, theme="professional_white"):
 
     footer = f"""
       <footer>
-        <div class="footer-brand">
-          <span class="footer-mark">SD</span>
-          <span>SHAKTIDOOTAM</span>
-        </div>
         <div class="footer-note">{esc(note)}</div>
         <div class="footer-page">{int(number):02d}/{int(total):02d}</div>
       </footer>
@@ -341,9 +337,8 @@ body:after {{
 }}
 
 .topbar {{
-  height:54px;
+  min-height:54px;
   display:flex;
-  justify-content:space-between;
   align-items:center;
   position:relative;
   z-index:3;
@@ -363,7 +358,7 @@ body:after {{
 
 .brand-name {{
   color:{NAVY};
-  font-size:16px;
+  font-size:20px;
   line-height:1;
   font-weight:950;
   letter-spacing:.8px;
@@ -371,9 +366,11 @@ body:after {{
 }}
 
 .brand-sub {{
-  color:{MUTED};
-  font-size:11px;
-  margin-top:5px;
+  color:{NAVY};
+  font-size:24px;
+  line-height:1;
+  font-weight:950;
+  letter-spacing:.4px;
 }}
 
 .page-pill {{
@@ -390,14 +387,15 @@ body:after {{
 .eyebrow {{
   position:relative;
   z-index:2;
-  margin-top:29px;
+  margin-top:0;
   display:inline-flex;
   align-self:flex-start;
   background:{GOLD};
   color:{NAVY};
   border-radius:10px;
-  padding:10px 16px;
-  font-size:14px;
+  padding:12px 18px;
+  font-size:20px;
+  line-height:1.1;
   font-weight:950;
   letter-spacing:.55px;
   text-transform:uppercase;
@@ -956,7 +954,7 @@ footer {{
   padding-top:13px;
   border-top:1px solid {LINE};
   display:grid;
-  grid-template-columns:175px minmax(0,1fr) 50px;
+  grid-template-columns:minmax(0,1fr) 50px;
   gap:12px;
   align-items:center;
 }}
@@ -1006,17 +1004,9 @@ footer {{
 
 <body>
   <div class="topbar">
-    <div class="brand">
-      <div class="brand-mark">{_brand_mark()}</div>
-      <div class="brand-copy">
-        <div class="brand-name">Shaktidootam</div>
-        <div class="brand-sub">Government Job Updates</div>
-      </div>
-    </div>
-    <div class="page-pill">SLIDE {int(number):02d} OF {int(total):02d}</div>
+    <div class="eyebrow">{esc(eyebrow)}</div>
   </div>
 
-  <div class="eyebrow">{esc(eyebrow)}</div>
   <h1>{esc(title)}</h1>
   {f'<div class="sub">{esc(subtitle)}</div>' if subtitle else ""}
   <div class="rule"></div>
