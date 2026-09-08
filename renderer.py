@@ -235,13 +235,6 @@ def build_html(slide, total, theme="professional_white"):
         hero = f"""
         <section class="hero">
           <div class="hero-grid"></div>
-          <div class="hero-topline">
-            <span class="hero-tag">LATEST RECRUITMENT</span>
-            <span class="hero-year">2026</span>
-          </div>
-
-          <div class="hero-title">{esc(title)}</div>
-          <div class="hero-org">{esc(eyebrow)}</div>
 
           {f"""
           <div class="hero-stat">
