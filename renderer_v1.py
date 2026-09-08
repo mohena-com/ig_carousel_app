@@ -94,63 +94,6 @@ def _post_card_html(card, index=0):
     """
 
 
-def _snapshot_card_html(card, index=0):
-    """Dashboard-style card for the Recruitment Snapshot slide."""
-    label = clean_text(card.get("label")) or "Details"
-    value = clean_text(card.get("value"))
-    meta = clean_text(card.get("meta"))
-    cls = "snapshot-card snapshot-feature" if index == 0 else "snapshot-card"
-    return f"""
-    <div class="{cls}">
-      <div class="snapshot-index">{index + 1:02d}</div>
-      <div class="snapshot-copy">
-        <div class="snapshot-label">{esc(label)}</div>
-        <div class="snapshot-value">{esc(value) if value else "—"}</div>
-        {f'<div class="snapshot-meta">{esc(meta)}</div>' if meta else ""}
-      </div>
-    </div>
-    """
-
-
-def _fee_card_html(card, index=0, primary=False):
-    """Financial card with stronger visual hierarchy for fee information."""
-    label = clean_text(card.get("label")) or "Details"
-    value = clean_text(card.get("value"))
-    meta = clean_text(card.get("meta"))
-    cls = "fee-card fee-primary-card" if primary else "fee-card"
-    return f"""
-    <div class="{cls}">
-      <div class="card-top">
-        <span class="card-dot"></span>
-        <span class="label">{esc(label)}</span>
-      </div>
-      <div class="value">{esc(value) if value else "—"}</div>
-      {f'<div class="meta">{esc(meta)}</div>' if meta else ""}
-    </div>
-    """
-
-
-def _checklist_panel_html(bullets, title):
-    """Render supplied bullets as a contained checklist panel."""
-    if not bullets:
-        return ""
-    items = "".join(
-        f"""
-        <li>
-          <span class="bullet-check">✓</span>
-          <span>{esc(x)}</span>
-        </li>
-        """
-        for x in bullets
-    )
-    return f"""
-    <section class="checklist-panel">
-      <div class="checklist-title">{esc(title)}</div>
-      <ul class="bullet-list">{items}</ul>
-    </section>
-    """
-
-
 def _date_card_html(card, index=0):
     label = clean_text(card.get("label")) or "Important date"
     value = clean_text(card.get("value"))
@@ -316,84 +259,16 @@ def build_html(slide, total, theme="professional_white"):
     content = ""
     if stype != "hook":
         if stype == "posts":
-            # Recruitment Snapshot: four facts become a deliberate 2x2 dashboard.
-            snapshot_html = "".join(
-                _snapshot_card_html(card, i) for i, card in enumerate(cards)
-            )
-            body = f'<div class="snapshot-grid">{snapshot_html}</div>'
-
-        elif stype == "eligibility":
-            # A single eligibility fact should look intentional, not like
-            # an undersized generic card floating in a large empty canvas.
-            eligibility_cards = "".join(
-                _card_html(card, i) for i, card in enumerate(cards)
-            )
-            body = f"""
-            <div class="eligibility-layout">
-              <div class="eligibility-panel">
-                {eligibility_cards}
-              </div>
-            </div>
-            """
-
-            if bullets_html:
-                body += f"""
-                <section class="eligibility-checklist">
-                  <div class="checklist-title">CHECK BEFORE APPLYING</div>
-                  <ul class="bullet-list">{bullets_html}</ul>
-                </section>
-                """
-
-        elif stype == "fees":
-            primary = "".join(
-                _fee_card_html(card, i, primary=True)
-                for i, card in enumerate(cards[:2])
-            )
-            secondary = "".join(
-                _fee_card_html(card, i + 2, primary=False)
-                for i, card in enumerate(cards[2:])
-            )
-            body = f"""
-            <div class="fees-layout">
-              {f'<div class="fee-primary-grid">{primary}</div>' if primary else ""}
-              {f'<div class="fee-secondary-grid">{secondary}</div>' if secondary else ""}
-            </div>
-            """
-
-            if bullets_html:
-                body += f"""
-                <section class="fees-checklist">
-                  <div class="checklist-title">IMPORTANT</div>
-                  <ul class="bullet-list">{bullets_html}</ul>
-                </section>
-                """
-
+            body = f'<div class="post-list {density}">{cards_html}</div>'
         elif stype == "dates":
-            body = f"""
-            <div class="dates-composition">
-              <section class="dates-panel">
-                <div class="section-kicker">APPLICATION SCHEDULE</div>
-                <div class="date-list">{cards_html}</div>
-              </section>
-              {_checklist_panel_html(bullets, "BEFORE YOU SUBMIT")}
-            </div>
-            """
-
+            body = f'<div class="date-list {density}">{cards_html}</div>'
         elif stype == "links":
-            body = f"""
-            <div class="links-composition">
-              <section class="links-panel">
-                <div class="section-kicker">OFFICIAL SOURCE</div>
-                <div class="links-wrap {density}">{cards_html}</div>
-              </section>
-              {_checklist_panel_html(bullets, "BEFORE YOU APPLY")}
-            </div>
-            """
-
+            body = f'<div class="links-wrap {density}">{cards_html}</div>'
         else:
             body = f'<div class="card-grid {density}">{cards_html}</div>'
-            if bullets_html:
-                body += f'<ul class="bullet-list {density}">{bullets_html}</ul>'
+
+        if bullets_html:
+            body += f'<ul class="bullet-list {density}">{bullets_html}</ul>'
 
         content = f"""
         <section class="content-block {stype} {density}">
@@ -641,234 +516,124 @@ h1 {{
 .card-grid.ultra-dense .value {{ font-size:15px; line-height:1.12; }}
 .card-grid.ultra-dense .meta {{ font-size:10px; margin-top:3px; }}
 
-/* SLIDE 2 — RECRUITMENT SNAPSHOT */
-.snapshot-grid {{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:16px;
-  align-content:start;
+/* POST / VACANCY LIST */
+.post-list {{
+  padding:2px 10px 0 2px;
 }}
 
-.snapshot-card {{
-  min-height:190px;
+.post-row {{
   position:relative;
-  background:{WHITE};
-  border:1px solid {LINE};
-  border-radius:20px;
-  padding:23px 24px;
-  box-shadow:0 8px 24px rgba(11,46,89,.055);
-  overflow:hidden;
   display:flex;
-  flex-direction:column;
-  justify-content:space-between;
+  gap:18px;
+  min-height:84px;
+  padding:0 0 18px;
+  align-items:center;
 }}
 
-.snapshot-card:after {{
+.post-row:not(:last-child):before {{
   content:"";
   position:absolute;
-  right:-55px;
-  bottom:-65px;
-  width:170px;
-  height:170px;
-  border:18px solid {SOFT_BLUE};
-  border-radius:50%;
+  left:13px; top:29px; bottom:0;
+  width:2px;
+  background:{LINE};
 }}
 
-.snapshot-index {{
-  width:34px;
-  height:34px;
+.post-index {{
+  width:32px; height:32px;
   border-radius:50%;
-  background:{SOFT_BLUE};
-  color:{NAVY};
+  background:{NAVY};
+  color:{WHITE};
   display:flex;
   align-items:center;
   justify-content:center;
   font-size:11px;
   font-weight:950;
+  border:4px solid {SOFT_BLUE};
+  flex:none;
   position:relative;
   z-index:1;
 }}
 
-.snapshot-copy {{
-  position:relative;
-  z-index:1;
-  margin-top:20px;
+.post-copy {{ min-width:0; }}
+
+.post-name {{
+  color:{INK};
+  font-size:20px;
+  line-height:1.2;
+  font-weight:850;
+  overflow-wrap:anywhere;
 }}
 
-.snapshot-label {{
-  color:{BLUE};
-  font-size:12px;
-  line-height:1.1;
-  font-weight:950;
-  letter-spacing:.8px;
-  text-transform:uppercase;
+.post-meta {{
+  color:{MUTED};
+  font-size:10px;
+  line-height:1.15;
+  margin-top:4px;
+  overflow-wrap:anywhere;
 }}
 
-.snapshot-value {{
+.post-count {{
+  min-width:0;
+  text-align:right;
+  margin-left:auto;
+  padding-left:16px;
+}}
+
+.post-count-number {{
   color:{NAVY};
   font-size:27px;
-  line-height:1.12;
-  font-weight:900;
-  margin-top:9px;
-  overflow-wrap:anywhere;
+  line-height:1;
+  font-weight:950;
 }}
 
-.snapshot-feature {{
-  background:{NAVY};
-  border-color:{NAVY};
+.post-count-label {{
+  color:{GOLD};
+  font-size:9px;
+  font-weight:950;
+  letter-spacing:.7px;
+  margin-top:4px;
 }}
 
-.snapshot-feature .snapshot-index {{
-  background:{GOLD};
-  color:{NAVY};
+.post-list.compact .post-row {{
+  min-height:74px;
+  padding-bottom:14px;
 }}
+.post-list.compact .post-index {{ width:29px; height:29px; border-width:3px; font-size:10px; }}
+.post-list.compact .post-name {{ font-size:18px; }}
+.post-list.compact .post-count-number {{ font-size:24px; }}
 
-.snapshot-feature .snapshot-label {{
-  color:#BCD7EA;
+.post-list.dense {{ padding-top:1px; }}
+.post-list.dense .post-row {{
+  min-height:60px;
+  gap:14px;
+  padding-bottom:11px;
 }}
+.post-list.dense .post-row:not(:last-child):before {{ left:10px; top:24px; }}
+.post-list.dense .post-index {{ width:26px; height:26px; border-width:3px; font-size:9px; }}
+.post-list.dense .post-name {{ font-size:14px; line-height:1.14; }}
+.post-list.dense .post-count-number {{ font-size:20px; }}
+.post-list.dense .post-count-label {{ font-size:7px; }}
 
-.snapshot-feature .snapshot-value {{
-  color:{WHITE};
-  font-size:52px;
-  line-height:.95;
-  letter-spacing:-1.5px;
+.post-list.ultra-dense {{ padding-top:0; }}
+.post-list.ultra-dense .post-row {{
+  min-height:54px;
+  gap:12px;
+  padding-bottom:8px;
 }}
+.post-list.ultra-dense .post-row:not(:last-child):before {{ left:9px; top:20px; }}
+.post-list.ultra-dense .post-index {{ width:24px; height:24px; border-width:3px; font-size:8px; }}
+.post-list.ultra-dense .post-name {{ font-size:13px; line-height:1.1; }}
+.post-list.ultra-dense .post-count-number {{ font-size:19px; }}
+.post-list.ultra-dense .post-count-label {{ font-size:6px; }}
 
-.snapshot-feature:after {{
-  border-color:rgba(228,165,28,.12);
-}}
-
-.snapshot-meta {{
-  color:{MUTED};
-  font-size:13px;
-  line-height:1.25;
-  margin-top:6px;
-  overflow-wrap:anywhere;
-}}
-
-/* SLIDE 3 — ELIGIBILITY */
-.eligibility-layout {{
-  width:100%;
-}}
-
-.eligibility-panel {{
-  background:{SOFT};
-  border:1px solid {LINE};
-  border-left:6px solid {BLUE};
-  border-radius:20px;
-  padding:24px 26px;
-  box-shadow:0 10px 28px rgba(11,46,89,.055);
-}}
-
-.eligibility-panel .info-card {{
-  min-height:185px;
-  border:0;
-  border-radius:0;
-  padding:0;
-  background:transparent;
-  box-shadow:none;
-}}
-
-.eligibility-panel .card-top {{
-  margin-bottom:12px;
-}}
-
-.eligibility-panel .label {{
-  font-size:12px;
-}}
-
-.eligibility-panel .value {{
-  font-size:31px;
-  line-height:1.18;
-  max-width:820px;
-}}
-
-.eligibility-panel .meta {{
-  font-size:15px;
-  margin-top:12px;
-}}
-
-.eligibility-checklist {{
-  margin-top:18px;
-  background:{WHITE};
-  border:1px solid {LINE};
-  border-radius:17px;
-  padding:18px 21px;
-}}
-
-/* SLIDE 4 — FEES / SELECTION / PAY */
-.fees-layout {{
-  display:flex;
-  flex-direction:column;
-  gap:17px;
-}}
-
-.fee-primary-grid {{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:16px;
-}}
-
-.fee-secondary-grid {{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:16px;
-}}
-
-.fee-card {{
-  min-height:145px;
-  background:{WHITE};
-  border:1px solid {LINE};
-  border-top:4px solid {GOLD};
-  border-radius:18px;
-  padding:19px 20px;
-  box-shadow:0 8px 24px rgba(11,46,89,.05);
-  overflow:hidden;
-}}
-
-.fee-primary-card {{
-  min-height:175px;
-  background:{SOFT};
-  padding:22px 23px;
-}}
-
-.fee-primary-card .label {{
-  font-size:12px;
-}}
-
-.fee-primary-card .value {{
-  color:{NAVY};
-  font-size:31px;
-  line-height:1.12;
-  margin-top:10px;
-}}
-
-.fee-secondary-grid .fee-card {{
-  min-height:165px;
-  border-top-width:2px;
-}}
-
-.fee-secondary-grid .value {{
-  font-size:21px;
-  line-height:1.2;
-}}
-
-.fees-checklist {{
-  margin-top:2px;
-  background:{SOFT};
-  border:1px solid {LINE};
-  border-radius:17px;
-  padding:17px 20px;
-}}
-
-/* BULLETS / CHECKLIST */
+/* BULLETS */
 .bullet-list {{
   list-style:none;
   padding:0;
-  margin:14px 0 0;
+  margin:17px 0 0;
   display:flex;
   flex-direction:column;
-  gap:9px;
+  gap:8px;
 }}
 
 .bullet-list li {{
@@ -876,14 +641,14 @@ h1 {{
   align-items:flex-start;
   gap:10px;
   color:{INK};
-  font-size:17px;
-  line-height:1.25;
+  font-size:18px;
+  line-height:1.24;
   font-weight:650;
 }}
 
 .bullet-check {{
   flex:none;
-  width:25px; height:25px;
+  width:24px; height:24px;
   border-radius:50%;
   background:{SOFT_BLUE};
   color:{BLUE};
@@ -892,16 +657,6 @@ h1 {{
   justify-content:center;
   font-size:13px;
   font-weight:950;
-}}
-
-.checklist-title,
-.section-kicker {{
-  color:{BLUE};
-  font-size:12px;
-  line-height:1;
-  font-weight:950;
-  letter-spacing:1px;
-  text-transform:uppercase;
 }}
 
 .bullet-list.compact li {{ font-size:16px; }}
@@ -910,34 +665,15 @@ h1 {{
 .bullet-list.ultra-dense li {{ font-size:12px; gap:7px; }}
 .bullet-list.ultra-dense .bullet-check {{ width:18px; height:18px; font-size:10px; }}
 
-/* SLIDE 5 — DATES + CHECKLIST */
-.dates-composition {{
-  display:grid;
-  grid-template-columns:0.9fr 1.5fr;
-  gap:18px;
-  align-items:stretch;
-}}
-
-.dates-panel,
-.checklist-panel {{
-  background:{SOFT};
-  border:1px solid {LINE};
-  border-radius:20px;
-  padding:21px 22px;
-  box-shadow:0 8px 24px rgba(11,46,89,.045);
-}}
-
-.dates-panel .date-list {{
-  margin-top:22px;
-  padding:0;
-}}
+/* DATES */
+.date-list {{ padding:2px 10px 0 2px; }}
 
 .date-row {{
   position:relative;
   display:flex;
   gap:15px;
-  min-height:91px;
-  padding:0 0 18px;
+  min-height:76px;
+  padding:0 0 15px;
 }}
 
 .date-row:not(:last-child):before {{
@@ -965,106 +701,57 @@ h1 {{
 }}
 
 .date-copy {{ padding-top:2px; min-width:0; }}
-.date-value {{
-  color:{NAVY};
-  font-size:27px;
-  line-height:1.1;
-  font-weight:900;
-  overflow-wrap:anywhere;
-}}
+.date-value {{ color:{INK}; font-size:23px; line-height:1.14; font-weight:900; overflow-wrap:anywhere; }}
 
-.date-list.compact .date-row {{ min-height:82px; }}
-.date-list.compact .date-value {{ font-size:24px; }}
+.date-list.compact .date-row {{ min-height:66px; }}
+.date-list.compact .date-value {{ font-size:19px; }}
 
-.date-list.dense .date-row {{ min-height:70px; gap:12px; padding-bottom:12px; }}
-.date-list.dense .date-marker {{ width:25px; height:25px; border-width:3px; font-size:8px; }}
-.date-list.dense .date-row:not(:last-child):before {{ left:11px; top:26px; }}
-.date-list.dense .date-value {{ font-size:20px; }}
+.date-list.dense .date-row {{ min-height:55px; gap:12px; padding-bottom:10px; }}
+.date-list.dense .date-marker {{ width:23px; height:23px; border-width:3px; font-size:8px; }}
+.date-list.dense .date-row:not(:last-child):before {{ left:10px; top:24px; }}
+.date-list.dense .date-value {{ font-size:16px; }}
 .date-list.dense .label {{ font-size:9px; }}
 .date-list.dense .meta {{ font-size:11px; }}
 
-.date-list.ultra-dense .date-row {{ min-height:58px; gap:9px; padding-bottom:8px; }}
-.date-list.ultra-dense .date-marker {{ width:21px; height:21px; border-width:2px; font-size:7px; }}
-.date-list.ultra-dense .date-row:not(:last-child):before {{ left:9px; top:21px; }}
-.date-list.ultra-dense .date-value {{ font-size:16px; }}
+.date-list.ultra-dense .date-row {{ min-height:47px; gap:9px; padding-bottom:7px; }}
+.date-list.ultra-dense .date-marker {{ width:20px; height:20px; border-width:2px; font-size:7px; }}
+.date-list.ultra-dense .date-row:not(:last-child):before {{ left:9px; top:20px; }}
+.date-list.ultra-dense .date-value {{ font-size:13px; }}
 .date-list.ultra-dense .label {{ font-size:8px; }}
 
-.checklist-panel {{
-  background:{WHITE};
-}}
-
-.checklist-panel .bullet-list {{
-  margin-top:20px;
-  gap:13px;
-}}
-
-.checklist-panel .bullet-list li {{
-  font-size:17px;
-  line-height:1.28;
-}}
-
-.checklist-panel .bullet-check {{
-  width:27px;
-  height:27px;
-  background:{SOFT_BLUE};
-}}
-
-/* SLIDE 6 — OFFICIAL LINKS + CHECKLIST */
-.links-composition {{
-  display:grid;
-  grid-template-columns:1.35fr 0.95fr;
-  gap:18px;
-  align-items:stretch;
-}}
-
-.links-panel {{
-  background:{SOFT};
-  border:1px solid {LINE};
-  border-radius:20px;
-  padding:21px 22px;
-  box-shadow:0 8px 24px rgba(11,46,89,.045);
-}}
-
-.links-panel .links-wrap {{
-  margin-top:20px;
-}}
+/* LINKS / QR */
+.links-wrap {{ display:flex; flex-direction:column; }}
 
 .link-card {{
   display:grid;
-  grid-template-columns:minmax(0,1fr) 132px;
-  gap:20px;
+  grid-template-columns:minmax(0,1fr) 118px;
+  gap:18px;
   align-items:center;
-  background:{WHITE};
+  background:{SOFT};
   border:1px solid {LINE};
   border-radius:17px;
-  padding:19px;
+  padding:17px;
   margin-bottom:12px;
-  box-shadow:0 6px 18px rgba(11,46,89,.04);
 }}
 
-.link-title {{
-  color:{NAVY};
-  font-size:25px;
-  line-height:1.12;
-  font-weight:900;
-}}
+.link-title {{ color:{NAVY}; font-size:22px; line-height:1.12; font-weight:900; }}
 
 .url {{
   color:{MUTED};
   font-size:12px;
   line-height:1.3;
   overflow-wrap:anywhere;
-  margin-top:8px;
+  margin-top:6px;
 }}
 
 .qr-wrap {{
   background:{WHITE};
-  padding:8px;
-  border-radius:13px;
+  padding:7px;
+  border-radius:12px;
   border:1px solid {LINE};
 }}
 
-.qr-wrap img {{ width:114px; height:114px; display:block; }}
+.qr-wrap img {{ width:104px; height:104px; display:block; }}
 
 .link-list {{
   background:{WHITE};
@@ -1079,41 +766,22 @@ h1 {{
 .link-row .url {{ margin-top:0; }}
 
 .links-wrap.dense .link-card {{
-  grid-template-columns:minmax(0,1fr) 102px;
-  gap:13px;
-  padding:13px;
+  grid-template-columns:minmax(0,1fr) 96px;
+  gap:12px;
+  padding:12px;
 }}
-.links-wrap.dense .qr-wrap img {{ width:88px; height:88px; }}
-.links-wrap.dense .link-title {{ font-size:19px; }}
+.links-wrap.dense .qr-wrap img {{ width:82px; height:82px; }}
+.links-wrap.dense .link-title {{ font-size:17px; }}
 
 .links-wrap.ultra-dense .link-card {{
-  grid-template-columns:minmax(0,1fr) 86px;
-  gap:10px;
-  padding:10px;
+  grid-template-columns:minmax(0,1fr) 82px;
+  gap:9px;
+  padding:9px;
 }}
-.links-wrap.ultra-dense .qr-wrap img {{ width:72px; height:72px; }}
-.links-wrap.ultra-dense .link-title {{ font-size:15px; }}
+.links-wrap.ultra-dense .qr-wrap img {{ width:68px; height:68px; }}
+.links-wrap.ultra-dense .link-title {{ font-size:14px; }}
 .links-wrap.ultra-dense .url {{ font-size:9px; }}
 
-.links-composition .checklist-panel {{
-  min-height:100%;
-}}
-
-.links-composition .checklist-panel .bullet-list {{
-  gap:15px;
-}}
-
-.links-composition .checklist-panel .bullet-list li {{
-  font-size:16px;
-  line-height:1.3;
-}}
-
-/* FALLBACK CONTENT */
-.content-block.eligibility .info-card {{ border-left:4px solid {BLUE}; }}
-.content-block.fees .info-card {{ border-top:3px solid {GOLD}; }}
-.content-block.links {{ margin-top:25px; }}
-.content-block.posts {{ margin-top:22px; }}
-.content-block.dates {{ margin-top:22px; }}
 /* HERO */
 .hero {{
   margin-top:28px;
