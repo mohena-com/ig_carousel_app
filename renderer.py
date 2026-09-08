@@ -118,10 +118,6 @@ def _link_card_html(card):
     return f"""
     <div class="link-card">
       <div class="link-copy">
-        <div class="card-top">
-          <span class="card-dot"></span>
-          <span class="label">{esc(label)}</span>
-        </div>
         <div class="link-title">{esc(label)}</div>
         <div class="url">{esc(url)}</div>
       </div>
@@ -293,6 +289,14 @@ def build_html(slide, total, theme="professional_white"):
 
     footer = f"""
       <footer>
+        <div class="footer-brand">
+          <svg class="instagram-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="3" y="3" width="18" height="18" rx="5"></rect>
+            <circle cx="12" cy="12" r="4"></circle>
+            <circle class="instagram-dot" cx="17.5" cy="6.5" r="1"></circle>
+          </svg>
+          <span>@shaktidootam</span>
+        </div>
         <div class="footer-note">{esc(note)}</div>
         <div class="footer-page">{int(number):02d}/{int(total):02d}</div>
       </footer>
@@ -954,7 +958,7 @@ footer {{
   padding-top:13px;
   border-top:1px solid {LINE};
   display:grid;
-  grid-template-columns:minmax(0,1fr) 50px;
+  grid-template-columns:175px minmax(0,1fr) 50px;
   gap:12px;
   align-items:center;
 }}
@@ -964,20 +968,21 @@ footer {{
   align-items:center;
   gap:7px;
   color:{NAVY};
-  font-size:11px;
+  font-size:12px;
   font-weight:950;
   letter-spacing:.7px;
 }}
 
-.footer-mark {{
+.instagram-icon {{
   width:22px; height:22px;
-  border-radius:6px;
-  background:{NAVY};
-  color:{WHITE};
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  font-size:7px;
+  fill:none;
+  stroke:{NAVY};
+  stroke-width:1.8;
+}}
+
+.instagram-dot {{
+  fill:{NAVY};
+  stroke:none;
 }}
 
 .footer-note {{
