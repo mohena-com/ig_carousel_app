@@ -441,7 +441,12 @@ def build_html(slide, total, theme="professional_white", total_vacancies=""):
             snapshot_html = "".join(
                 _snapshot_card_html(card, i) for i, card in enumerate(cards)
             )
-            body = f'<div class="snapshot-grid">{snapshot_html}</div>'
+            snapshot_mode = (
+                "snapshot-one" if len(cards) == 1
+                else "snapshot-two" if len(cards) == 2
+                else "snapshot-many"
+            )
+            body = f'<div class="snapshot-grid {snapshot_mode}">{snapshot_html}</div>'
 
         elif stype == "eligibility":
             # Post-wise eligibility can contain many long qualifications.
@@ -675,6 +680,20 @@ body:after {{
   z-index:0;
 }}
 
+.page-layer {{
+  position:absolute;
+  z-index:0;
+  left:24px;
+  right:24px;
+  top:42px;
+  bottom:86px;
+  border-radius:28px;
+  background:linear-gradient(180deg, #FBFCFE 0%, {SOFT} 52%, #FBFCFE 100%);
+  border:1px solid rgba(216,225,234,.55);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8);
+  pointer-events:none;
+}}
+
 .topbar {{
   min-height:48px;
   display:flex;
@@ -798,12 +817,15 @@ h1 {{
 
 .content-block {{
   margin-top:23px;
-  flex:1;
+  flex:1 1 auto;
   min-height:0;
+  max-height:100%;
   position:relative;
   z-index:2;
   display:flex;
   flex-direction:column;
+  overflow:visible;
+  transform-origin:top center;
 }}
 
 .card-grid {{
@@ -1023,6 +1045,39 @@ h1 {{
   min-height:120px;
   background:{SOFT};
   border-top:4px solid {GOLD};
+}}
+
+.snapshot-two {{
+  grid-template-columns:1fr 1fr;
+  grid-template-rows:auto;
+}}
+
+.snapshot-two .snapshot-card {{
+  min-height:245px;
+}}
+
+.snapshot-two .snapshot-card:first-child {{
+  grid-row:auto;
+}}
+
+.snapshot-two .snapshot-card:first-child .snapshot-value {{
+  font-size:64px;
+}}
+
+.snapshot-one {{
+  grid-template-columns:1fr;
+}}
+
+.snapshot-one .snapshot-card {{
+  min-height:330px;
+}}
+
+.snapshot-one .snapshot-card:first-child .snapshot-value {{
+  font-size:78px;
+}}
+
+.snapshot-many {{
+  grid-template-columns:1.05fr .95fr;
 }}
 
 /* SLIDE 3 — ELIGIBILITY */
@@ -1842,6 +1897,16 @@ footer {{
   padding-top:12px;
 }}
 
+.benefit-strip:before {{
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  top:-8px;
+  height:8px;
+  background:linear-gradient(90deg, transparent 0%, rgba(11,46,89,.10) 18%, rgba(11,46,89,.10) 82%, transparent 100%);
+}}
+
 .benefit-strip {{
   min-height:70px;
   width:100%;
@@ -1956,6 +2021,8 @@ footer {{
 </head>
 
 <body>
+  <div class="page-layer" aria-hidden="true"></div>
+
   <div class="topbar">
     <div class="top-brand">
       <div class="top-brand-mark">SD</div>
@@ -1978,6 +2045,46 @@ footer {{
   {hero}
   {content}
   {footer}
+<script>
+(function () {{
+  function fitContent() {{
+    const content = document.querySelector(".content-block");
+    const footer = document.querySelector("footer");
+    if (!content || !footer) return;
+
+    content.style.transform = "";
+    content.style.transformOrigin = "";
+    content.style.width = "";
+    content.style.marginLeft = "";
+
+    const contentTop = content.getBoundingClientRect().top;
+    const footerTop = footer.getBoundingClientRect().top;
+    const available = Math.max(1, footerTop - contentTop - 14);
+    const actual = Math.max(
+      content.scrollHeight,
+      content.getBoundingClientRect().height
+    );
+
+    if (actual > available) {{
+      // Never let dense source content collide with the footer.
+      // 0.72 is a safety floor to keep type readable.
+      const scale = Math.max(0.72, Math.min(1, available / actual));
+      content.style.transformOrigin = "top center";
+      content.style.transform = "scale(" + scale.toFixed(4) + ")";
+      content.style.width = (100 / scale).toFixed(3) + "%";
+      content.style.marginLeft = ((100 - (100 / scale)) / 2).toFixed(3) + "%";
+    }}
+  }}
+
+  window.addEventListener("load", function () {{
+    requestAnimationFrame(function () {{
+      requestAnimationFrame(fitContent);
+    }});
+  }});
+
+  window.fitCarouselContent = fitContent;
+}})();
+</script>
 </body>
 </html>"""
 
