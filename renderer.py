@@ -531,9 +531,9 @@ h1 {{
 .post-row {{
   position:relative;
   display:flex;
-  gap:15px;
-  min-height:76px;
-  padding:0 0 15px;
+  gap:18px;
+  min-height:84px;
+  padding:0 0 18px;
   align-items:center;
 }}
 
@@ -546,14 +546,14 @@ h1 {{
 }}
 
 .post-index {{
-  width:28px; height:28px;
+  width:32px; height:32px;
   border-radius:50%;
   background:{NAVY};
   color:{WHITE};
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:10px;
+  font-size:11px;
   font-weight:950;
   border:4px solid {SOFT_BLUE};
   flex:none;
@@ -565,8 +565,8 @@ h1 {{
 
 .post-name {{
   color:{INK};
-  font-size:15px;
-  line-height:1.17;
+  font-size:20px;
+  line-height:1.2;
   font-weight:850;
   overflow-wrap:anywhere;
 }}
@@ -588,50 +588,50 @@ h1 {{
 
 .post-count-number {{
   color:{NAVY};
-  font-size:21px;
+  font-size:27px;
   line-height:1;
   font-weight:950;
 }}
 
 .post-count-label {{
   color:{GOLD};
-  font-size:7px;
+  font-size:9px;
   font-weight:950;
   letter-spacing:.7px;
   margin-top:4px;
 }}
 
 .post-list.compact .post-row {{
-  min-height:66px;
-  padding-bottom:12px;
+  min-height:74px;
+  padding-bottom:14px;
 }}
-.post-list.compact .post-index {{ width:25px; height:25px; border-width:3px; font-size:9px; }}
-.post-list.compact .post-name {{ font-size:13px; }}
-.post-list.compact .post-count-number {{ font-size:18px; }}
+.post-list.compact .post-index {{ width:29px; height:29px; border-width:3px; font-size:10px; }}
+.post-list.compact .post-name {{ font-size:18px; }}
+.post-list.compact .post-count-number {{ font-size:24px; }}
 
 .post-list.dense {{ padding-top:1px; }}
 .post-list.dense .post-row {{
-  min-height:55px;
-  gap:12px;
-  padding-bottom:10px;
+  min-height:60px;
+  gap:14px;
+  padding-bottom:11px;
 }}
 .post-list.dense .post-row:not(:last-child):before {{ left:10px; top:24px; }}
-.post-list.dense .post-index {{ width:23px; height:23px; border-width:3px; font-size:8px; }}
-.post-list.dense .post-name {{ font-size:11px; line-height:1.12; }}
-.post-list.dense .post-count-number {{ font-size:16px; }}
-.post-list.dense .post-count-label {{ font-size:6px; }}
+.post-list.dense .post-index {{ width:26px; height:26px; border-width:3px; font-size:9px; }}
+.post-list.dense .post-name {{ font-size:14px; line-height:1.14; }}
+.post-list.dense .post-count-number {{ font-size:20px; }}
+.post-list.dense .post-count-label {{ font-size:7px; }}
 
 .post-list.ultra-dense {{ padding-top:0; }}
 .post-list.ultra-dense .post-row {{
-  min-height:47px;
-  gap:9px;
-  padding-bottom:7px;
+  min-height:54px;
+  gap:12px;
+  padding-bottom:8px;
 }}
 .post-list.ultra-dense .post-row:not(:last-child):before {{ left:9px; top:20px; }}
-.post-list.ultra-dense .post-index {{ width:20px; height:20px; border-width:2px; font-size:7px; }}
-.post-list.ultra-dense .post-name {{ font-size:10px; line-height:1.08; }}
-.post-list.ultra-dense .post-count-number {{ font-size:14px; }}
-.post-list.ultra-dense .post-count-label {{ font-size:5px; }}
+.post-list.ultra-dense .post-index {{ width:24px; height:24px; border-width:3px; font-size:8px; }}
+.post-list.ultra-dense .post-name {{ font-size:13px; line-height:1.1; }}
+.post-list.ultra-dense .post-count-number {{ font-size:19px; }}
+.post-list.ultra-dense .post-count-label {{ font-size:6px; }}
 
 /* BULLETS */
 .bullet-list {{
