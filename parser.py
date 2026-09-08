@@ -208,7 +208,7 @@ def parse_eligibility_sections(elig: str):
     lines=[clean(x) for x in elig.splitlines() if clean(x)]
     heads=[]
     for i,x in enumerate(lines):
-        if re.search(r"Eligibility with Code|Eligibility Criteria|Eligibility Details",x,re.I) and not re.search(r"More Eligibility",x,re.I):
+        if re.search(r"(?:Eligibility with Code|Eligibility Criteria|Eligibility Details|Eligibility)$",x,re.I) and not re.search(r"More Eligibility",x,re.I):
             heads.append((i,x))
     cards=[]
     for n,(i,h) in enumerate(heads):
