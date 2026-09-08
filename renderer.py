@@ -393,11 +393,11 @@ body:after {{
   background:{GOLD};
   color:{NAVY};
   border-radius:10px;
-  padding:12px 18px;
-  font-size:20px;
-  line-height:1.1;
-  font-weight:950;
-  letter-spacing:.55px;
+  padding:15px 22px;
+  font-size:27px;
+  line-height:1.12;
+  font-weight:1000;
+  letter-spacing:.35px;
   text-transform:uppercase;
   max-width:900px;
   box-shadow:0 4px 12px rgba(228,165,28,.16);
