@@ -27,6 +27,11 @@ def make_deck(f: JobFacts):
     hero_bullets=[]
     if f.application_start and f.application_end:
         hero_bullets.append(f"Applications: {f.application_start} → {f.application_end}")
+    elif f.application_end:
+        hero_bullets.append(f"Application deadline: {f.application_end}")
+    if not hero_bullets:
+        fallback_details = f.application_steps or f.selection_process
+        hero_bullets.extend(fallback_details[:3])
     slides.append(IGSlide(slide_number=1,slide_type="hook",title="New Recruitment Alert",eyebrow=org,subtitle=name,cards=hero_cards,bullets=hero_bullets,footer_note=("⚠ Source conflict: " + f.conflicts[0] if f.conflicts else None)))
 
     # Posts are usually short enough for one dense two-column slide. The current

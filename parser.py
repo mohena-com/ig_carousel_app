@@ -67,7 +67,7 @@ def parse_org_and_name(lines):
     # institutional name from the complete source in parse_job's fallback.
     if not recruitment:
         for x in cleaned:
-            if len(x)<180 and re.search(r"\b(?:Recruitment|Online Form|Examination|Exam)\b",x,re.I) and not re.search(r"Short Details|Read the|See the|Age Relaxation|Advt\.?\s*No",x,re.I):
+            if len(x)<180 and re.search(r"\b(?:Recruitment|Online Form|Examination|Exam)\b",x,re.I) and not re.search(r"Short Details|Read the|See the|Age Limit|For recruitment eligibility|Age Relaxation|Advt\.?\s*No|Total Vacancies|Application",x,re.I):
                 recruitment=x; break
     return org, recruitment, adv
 
@@ -254,6 +254,9 @@ def parse_job(text: str) -> JobFacts:
     km=re.search(r"(?:Can Apply Online|Apply Online).*?(\d{1,2}[/-]\d{1,2}[/-]\d{2,4}|\d{1,2}\s+[A-Za-z]+\s+\d{4})\s+(?:to|through|until|till|-|–)\s+(\d{1,2}[/-]\d{1,2}[/-]\d{2,4}|\d{1,2}\s+[A-Za-z]+\s+\d{4})",key,re.I|re.S)
     if km: start,end=km.group(1),km.group(2)
     else: start,end=parse_application_dates(how)
+    if not end:
+        deadline=re.search(r"^Application Deadline\s*:\s*(\d{4}-\d{2}-\d{2}|\d{1,2}[/-]\d{1,2}[/-]\d{2,4})",text,re.I|re.M)
+        if deadline: end=deadline.group(1)
     fee_last,correction,exams,other=parse_dates(fee)
     fees,payment=parse_fees(fee)
     age,relax=parse_age(key)
