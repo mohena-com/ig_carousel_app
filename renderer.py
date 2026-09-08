@@ -369,6 +369,25 @@ def build_html(slide, total, theme="professional_white", total_vacancies=""):
             for i, x in enumerate(remaining_bullets[:3])
         )
 
+        hero_benefits = """
+          <div class="hero-benefits">
+            <div class="hero-benefit">
+              <span class="hero-benefit-icon">●</span>
+              <span><strong>Government</strong><small>Job</small></span>
+            </div>
+            <div class="hero-benefit-divider"></div>
+            <div class="hero-benefit">
+              <span class="hero-benefit-icon">↗</span>
+              <span><strong>Stable</strong><small>Career</small></span>
+            </div>
+            <div class="hero-benefit-divider"></div>
+            <div class="hero-benefit">
+              <span class="hero-benefit-icon">✓</span>
+              <span><strong>Serve</strong><small>the Society</small></span>
+            </div>
+          </div>
+        """
+
         hero = f"""
         <section class="hero">
           <div class="hero-grid"></div>
@@ -397,6 +416,7 @@ def build_html(slide, total, theme="professional_white", total_vacancies=""):
             """ if application_highlight else ""}
 
             {f'<div class="hero-info-grid">{hero_points}</div>' if hero_points else ""}
+            {hero_benefits}
           </div>
 
           <div class="hero-callout">
@@ -862,60 +882,63 @@ h1 {{
 /* SLIDE 2 — RECRUITMENT SNAPSHOT */
 .snapshot-grid {{
   display:grid;
-  grid-template-columns:1fr 1fr;
+  grid-template-columns:1.12fr .88fr;
+  grid-template-rows:auto auto;
   gap:16px;
   align-content:start;
 }}
 
 .snapshot-card {{
-  min-height:190px;
+  min-height:150px;
   position:relative;
   background:{WHITE};
   border:1px solid {LINE};
-  border-radius:20px;
-  padding:23px 24px;
+  border-radius:19px;
+  padding:20px 21px;
   box-shadow:0 8px 24px rgba(11,46,89,.055);
   overflow:hidden;
   display:flex;
   flex-direction:column;
-  justify-content:space-between;
+  justify-content:flex-end;
 }}
 
 .snapshot-card:after {{
   content:"";
   position:absolute;
   right:-55px;
-  bottom:-65px;
-  width:170px;
-  height:170px;
-  border:18px solid {SOFT_BLUE};
+  bottom:-70px;
+  width:180px;
+  height:180px;
+  border:19px solid {SOFT_BLUE};
   border-radius:50%;
 }}
 
 .snapshot-index {{
-  width:34px;
-  height:34px;
+  position:absolute;
+  top:18px;
+  right:19px;
+  width:30px;
+  height:30px;
   border-radius:50%;
   background:{SOFT_BLUE};
-  color:{NAVY};
+  color:{BLUE};
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:11px;
+  font-size:9px;
   font-weight:950;
-  position:relative;
   z-index:1;
 }}
 
 .snapshot-copy {{
   position:relative;
   z-index:1;
-  margin-top:20px;
+  max-width:100%;
 }}
 
 .snapshot-label {{
   color:{BLUE};
-  font-size:12px;
+  font-size:11px;
   line-height:1.1;
   font-weight:950;
   letter-spacing:.8px;
@@ -924,44 +947,82 @@ h1 {{
 
 .snapshot-value {{
   color:{NAVY};
-  font-size:27px;
+  font-size:25px;
   line-height:1.12;
   font-weight:900;
-  margin-top:9px;
+  margin-top:8px;
   overflow-wrap:anywhere;
 }}
 
 .snapshot-feature {{
+  grid-row:1 / span 2;
+  min-height:340px;
+  justify-content:center;
+  padding:29px;
   background:{NAVY};
   border-color:{NAVY};
 }}
 
+.snapshot-feature:after {{
+  border-color:rgba(255,255,255,.07);
+  width:320px;
+  height:320px;
+  right:-160px;
+  bottom:-170px;
+}}
+
 .snapshot-feature .snapshot-index {{
+  top:25px;
+  left:25px;
+  right:auto;
   background:{GOLD};
   color:{NAVY};
 }}
 
+.snapshot-feature .snapshot-copy {{
+  margin-top:35px;
+}}
+
 .snapshot-feature .snapshot-label {{
-  color:#BCD7EA;
+  color:#BFD5E5;
+  font-size:13px;
+  letter-spacing:1.1px;
 }}
 
 .snapshot-feature .snapshot-value {{
   color:{WHITE};
-  font-size:52px;
-  line-height:.95;
-  letter-spacing:-1.5px;
+  font-size:72px;
+  line-height:.92;
+  letter-spacing:-3px;
+  margin-top:14px;
 }}
 
-.snapshot-feature:after {{
-  border-color:rgba(228,165,28,.12);
+.snapshot-feature .snapshot-meta {{
+  color:#D7E5F0;
+  font-size:14px;
+  line-height:1.3;
+  margin-top:15px;
+  max-width:400px;
 }}
 
 .snapshot-meta {{
   color:{MUTED};
-  font-size:13px;
+  font-size:12px;
   line-height:1.25;
   margin-top:6px;
   overflow-wrap:anywhere;
+}}
+
+.snapshot-grid .snapshot-card:nth-child(2),
+.snapshot-grid .snapshot-card:nth-child(3) {{
+  min-height:162px;
+}}
+
+.snapshot-grid .snapshot-card:nth-child(4) {{
+  grid-column:2;
+  min-height:120px;
+  background:{SOFT};
+  border-top:4px solid {GOLD};
 }}
 
 /* SLIDE 3 — ELIGIBILITY */
@@ -972,234 +1033,224 @@ h1 {{
 .eligibility-grid {{
   display:grid;
   grid-template-columns:1fr 1fr;
-  gap:15px;
+  gap:14px;
   align-items:stretch;
 }}
 
 .eligibility-card {{
-  min-height:150px;
+  min-height:142px;
+  position:relative;
   background:{WHITE};
   border:1px solid {LINE};
-  border-left:5px solid {BLUE};
   border-radius:17px;
-  padding:18px 18px 17px;
+  padding:17px 18px 16px 20px;
   box-shadow:0 7px 20px rgba(11,46,89,.05);
   overflow:hidden;
+}}
+
+.eligibility-card:before {{
+  content:"";
+  position:absolute;
+  left:0; top:0; bottom:0;
+  width:5px;
+  background:{BLUE};
 }}
 
 .eligibility-card-head {{
   display:flex;
   align-items:center;
   gap:7px;
-  margin-bottom:9px;
+  margin-bottom:8px;
+}}
+
+.eligibility-card-head .card-dot {{
+  width:8px;
+  height:8px;
 }}
 
 .eligibility-code {{
   color:{BLUE};
-  font-size:11px;
+  font-size:10px;
   line-height:1;
   font-weight:950;
-  letter-spacing:.55px;
+  letter-spacing:.65px;
   text-transform:uppercase;
 }}
 
 .eligibility-value {{
   color:{INK};
-  font-size:21px;
-  line-height:1.18;
+  font-size:19px;
+  line-height:1.17;
   font-weight:800;
   overflow-wrap:anywhere;
 }}
 
 .eligibility-meta {{
   color:{MUTED};
-  font-size:12px;
+  font-size:11px;
   line-height:1.25;
-  margin-top:7px;
+  margin-top:6px;
   overflow-wrap:anywhere;
 }}
 
 .eligibility-few .eligibility-grid {{
   grid-template-columns:1fr;
-  gap:16px;
+  gap:15px;
 }}
 
 .eligibility-few .eligibility-card {{
-  min-height:185px;
-  padding:23px 25px;
+  min-height:175px;
+  padding:22px 24px;
 }}
 
 .eligibility-few .eligibility-value {{
-  font-size:29px;
-  line-height:1.17;
-  max-width:880px;
+  font-size:28px;
+  line-height:1.16;
 }}
 
 .eligibility-medium .eligibility-card {{
-  min-height:155px;
-  padding:17px 18px;
+  min-height:150px;
 }}
 
 .eligibility-medium .eligibility-value {{
-  font-size:19px;
-  line-height:1.17;
+  font-size:18px;
 }}
 
 .eligibility-many .eligibility-grid {{
-  gap:13px;
+  gap:12px;
 }}
 
 .eligibility-many .eligibility-card {{
-  min-height:146px;
-  padding:15px 16px 14px;
+  min-height:140px;
+  padding:14px 15px 13px 17px;
   border-radius:15px;
 }}
 
-.eligibility-many .eligibility-card-head {{
-  margin-bottom:7px;
+.eligibility-many .eligibility-value {{
+  font-size:17px;
+  line-height:1.16;
 }}
 
 .eligibility-many .eligibility-code {{
-  font-size:10px;
-}}
-
-.eligibility-many .eligibility-value {{
-  font-size:18px;
-  line-height:1.17;
-}}
-
-.eligibility-many .eligibility-meta {{
-  font-size:11px;
-  margin-top:5px;
+  font-size:9px;
 }}
 
 .eligibility-checklist {{
-  margin-top:18px;
-  background:{WHITE};
+  margin-top:16px;
+  background:{SOFT};
   border:1px solid {LINE};
-  border-radius:17px;
-  padding:18px 21px;
+  border-radius:16px;
+  padding:16px 19px;
 }}
 
 /* SLIDE 4 — FEES / SELECTION / PAY */
 .fees-layout {{
   display:flex;
   flex-direction:column;
-  gap:17px;
+  gap:15px;
 }}
 
 .fee-primary-grid {{
   display:grid;
   grid-template-columns:1fr 1fr;
-  gap:16px;
+  gap:15px;
 }}
 
 .fee-secondary-grid {{
   display:grid;
   grid-template-columns:1fr 1fr;
-  gap:16px;
+  gap:15px;
 }}
 
 .fee-card {{
-  min-height:145px;
+  min-height:140px;
+  position:relative;
   background:{WHITE};
   border:1px solid {LINE};
-  border-top:4px solid {GOLD};
   border-radius:18px;
-  padding:19px 20px;
+  padding:18px 20px;
   box-shadow:0 8px 24px rgba(11,46,89,.05);
   overflow:hidden;
 }}
 
+.fee-card:after {{
+  content:"";
+  position:absolute;
+  right:-60px;
+  bottom:-70px;
+  width:150px;
+  height:150px;
+  border:16px solid {SOFT_BLUE};
+  border-radius:50%;
+}}
+
 .fee-primary-card {{
   min-height:175px;
+  background:{NAVY};
+  border-color:{NAVY};
+  border-top:4px solid {GOLD};
+  padding:21px 22px;
+}}
+
+.fee-primary-card:nth-child(2) {{
   background:{SOFT};
-  padding:22px 23px;
+  border-color:{LINE};
+  border-top-color:{GOLD};
+}}
+
+.fee-primary-card .card-top,
+.fee-primary-card .value,
+.fee-primary-card .meta {{
+  position:relative;
+  z-index:1;
+}}
+
+.fee-primary-card:first-child .label {{
+  color:{GOLD};
+}}
+
+.fee-primary-card:first-child .value {{
+  color:{WHITE};
+}}
+
+.fee-primary-card:first-child .meta {{
+  color:#C5D8E7;
 }}
 
 .fee-primary-card .label {{
-  font-size:12px;
+  font-size:11px;
 }}
 
 .fee-primary-card .value {{
   color:{NAVY};
   font-size:31px;
-  line-height:1.12;
-  margin-top:10px;
+  line-height:1.1;
+  margin-top:13px;
 }}
 
 .fee-secondary-grid .fee-card {{
-  min-height:165px;
-  border-top-width:2px;
+  min-height:150px;
+  border-top:3px solid {BLUE};
 }}
 
 .fee-secondary-grid .value {{
-  font-size:21px;
+  font-size:19px;
   line-height:1.2;
 }}
 
 .fees-checklist {{
-  margin-top:2px;
+  margin-top:0;
   background:{SOFT};
   border:1px solid {LINE};
-  border-radius:17px;
-  padding:17px 20px;
+  border-radius:16px;
+  padding:15px 19px;
 }}
-
-/* BULLETS / CHECKLIST */
-.bullet-list {{
-  list-style:none;
-  padding:0;
-  margin:14px 0 0;
-  display:flex;
-  flex-direction:column;
-  gap:9px;
-}}
-
-.bullet-list li {{
-  display:flex;
-  align-items:flex-start;
-  gap:10px;
-  color:{INK};
-  font-size:17px;
-  line-height:1.25;
-  font-weight:650;
-}}
-
-.bullet-check {{
-  flex:none;
-  width:25px; height:25px;
-  border-radius:50%;
-  background:{SOFT_BLUE};
-  color:{BLUE};
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:13px;
-  font-weight:950;
-}}
-
-.checklist-title,
-.section-kicker {{
-  color:{BLUE};
-  font-size:12px;
-  line-height:1;
-  font-weight:950;
-  letter-spacing:1px;
-  text-transform:uppercase;
-}}
-
-.bullet-list.compact li {{ font-size:16px; }}
-.bullet-list.dense li {{ font-size:14px; gap:8px; }}
-.bullet-list.dense .bullet-check {{ width:20px; height:20px; font-size:11px; }}
-.bullet-list.ultra-dense li {{ font-size:12px; gap:7px; }}
-.bullet-list.ultra-dense .bullet-check {{ width:18px; height:18px; font-size:10px; }}
 
 /* SLIDE 5 — DATES + CHECKLIST */
 .dates-composition {{
   display:grid;
-  grid-template-columns:0.9fr 1.5fr;
-  gap:18px;
+  grid-template-columns:1.05fr 1fr;
+  gap:16px;
   align-items:stretch;
 }}
 
@@ -1208,29 +1259,47 @@ h1 {{
   background:{SOFT};
   border:1px solid {LINE};
   border-radius:20px;
-  padding:21px 22px;
+  padding:20px 21px;
   box-shadow:0 8px 24px rgba(11,46,89,.045);
 }}
 
+.dates-panel {{
+  position:relative;
+  overflow:hidden;
+}}
+
+.dates-panel:after {{
+  content:"";
+  position:absolute;
+  width:230px;
+  height:230px;
+  right:-145px;
+  bottom:-155px;
+  border:25px solid {SOFT_BLUE};
+  border-radius:50%;
+}}
+
 .dates-panel .date-list {{
-  margin-top:22px;
+  margin-top:20px;
   padding:0;
+  position:relative;
+  z-index:1;
 }}
 
 .date-row {{
   position:relative;
   display:flex;
-  gap:15px;
-  min-height:91px;
+  gap:14px;
+  min-height:93px;
   padding:0 0 18px;
 }}
 
 .date-row:not(:last-child):before {{
   content:"";
   position:absolute;
-  left:13px; top:29px; bottom:0;
-  width:2px;
-  background:{LINE};
+  left:13px; top:30px; bottom:0;
+  width:3px;
+  background:{GOLD};
 }}
 
 .date-marker {{
@@ -1244,54 +1313,50 @@ h1 {{
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:10px;
+  font-size:9px;
   font-weight:950;
   border:4px solid {SOFT_BLUE};
 }}
 
-.date-copy {{ padding-top:2px; min-width:0; }}
+.date-copy {{
+  padding-top:1px;
+  min-width:0;
+}}
+
 .date-value {{
   color:{NAVY};
-  font-size:27px;
-  line-height:1.1;
-  font-weight:900;
+  font-size:28px;
+  line-height:1.08;
+  font-weight:950;
   overflow-wrap:anywhere;
 }}
 
-.date-list.compact .date-row {{ min-height:82px; }}
-.date-list.compact .date-value {{ font-size:24px; }}
+.date-list .label {{
+  font-size:10px;
+}}
 
-.date-list.dense .date-row {{ min-height:70px; gap:12px; padding-bottom:12px; }}
-.date-list.dense .date-marker {{ width:25px; height:25px; border-width:3px; font-size:8px; }}
-.date-list.dense .date-row:not(:last-child):before {{ left:11px; top:26px; }}
-.date-list.dense .date-value {{ font-size:20px; }}
-.date-list.dense .label {{ font-size:9px; }}
-.date-list.dense .meta {{ font-size:11px; }}
-
-.date-list.ultra-dense .date-row {{ min-height:58px; gap:9px; padding-bottom:8px; }}
-.date-list.ultra-dense .date-marker {{ width:21px; height:21px; border-width:2px; font-size:7px; }}
-.date-list.ultra-dense .date-row:not(:last-child):before {{ left:9px; top:21px; }}
-.date-list.ultra-dense .date-value {{ font-size:16px; }}
-.date-list.ultra-dense .label {{ font-size:8px; }}
+.date-list .meta {{
+  font-size:11px;
+  margin-top:5px;
+}}
 
 .checklist-panel {{
   background:{WHITE};
 }}
 
 .checklist-panel .bullet-list {{
-  margin-top:20px;
-  gap:13px;
+  margin-top:18px;
+  gap:12px;
 }}
 
 .checklist-panel .bullet-list li {{
-  font-size:17px;
+  font-size:15px;
   line-height:1.28;
 }}
 
 .checklist-panel .bullet-check {{
-  width:27px;
-  height:27px;
-  background:{SOFT_BLUE};
+  width:26px;
+  height:26px;
 }}
 
 /* SLIDE 6 — OFFICIAL LINKS + CHECKLIST */
