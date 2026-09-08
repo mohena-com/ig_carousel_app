@@ -559,16 +559,61 @@ def build_html(slide, total, theme="professional_white", total_vacancies=""):
 
     footer = f"""
       <footer>
-        <div class="footer-brand">
-          <svg class="instagram-icon" viewBox="0 0 24 24" aria-hidden="true">
-            <rect x="3" y="3" width="18" height="18" rx="5"></rect>
-            <circle cx="12" cy="12" r="4"></circle>
-            <circle class="instagram-dot" cx="17.5" cy="6.5" r="1"></circle>
-          </svg>
-          <span>@shaktidootam</span>
+        <div class="benefit-strip">
+          <div class="benefit-item">
+            <div class="benefit-icon">
+              <svg viewBox="0 0 32 32" aria-hidden="true">
+                <circle cx="16" cy="9" r="4"></circle>
+                <path d="M8 24c.8-4.4 3.7-7 8-7s7.2 2.6 8 7"></path>
+                <path d="M4.5 22c.5-2.7 2.1-4.4 4.6-5.2"></path>
+                <path d="M27.5 22c-.5-2.7-2.1-4.4-4.6-5.2"></path>
+              </svg>
+            </div>
+            <div class="benefit-copy">
+              <strong>Government</strong>
+              <span>Job</span>
+            </div>
+          </div>
+
+          <div class="benefit-divider"></div>
+
+          <div class="benefit-item">
+            <div class="benefit-icon">
+              <svg viewBox="0 0 32 32" aria-hidden="true">
+                <path d="M6 25V19"></path>
+                <path d="M12 25V15"></path>
+                <path d="M18 25V11"></path>
+                <path d="M24 25V6"></path>
+                <path d="M5 9l7 2 6-5 7 1"></path>
+                <path d="M21 5h4v4"></path>
+              </svg>
+            </div>
+            <div class="benefit-copy">
+              <strong>Stable</strong>
+              <span>Career</span>
+            </div>
+          </div>
+
+          <div class="benefit-divider"></div>
+
+          <div class="benefit-item">
+            <div class="benefit-icon">
+              <svg viewBox="0 0 32 32" aria-hidden="true">
+                <path d="M16 4l9 3v7c0 6.2-3.8 10.5-9 13-5.2-2.5-9-6.8-9-13V7l9-3z"></path>
+                <path d="M11 16l3.2 3.2L21 12"></path>
+              </svg>
+            </div>
+            <div class="benefit-copy">
+              <strong>Serve</strong>
+              <span>the Society</span>
+            </div>
+          </div>
         </div>
-        <div class="footer-note">{esc(note)}</div>
-        <div class="footer-page">{int(number):02d}/{int(total):02d}</div>
+
+        <div class="footer-bottom">
+          <div class="footer-note">{esc(note)}</div>
+          <div class="footer-page">{int(number):02d}/{int(total):02d}</div>
+        </div>
       </footer>
     """
 
@@ -611,51 +656,72 @@ body:after {{
 }}
 
 .topbar {{
-  min-height:54px;
+  min-height:48px;
   display:flex;
   align-items:center;
+  justify-content:space-between;
   position:relative;
   z-index:3;
 }}
 
-.brand {{ display:flex; align-items:center; gap:11px; }}
-
-.brand-mark {{
-  width:38px; height:38px;
-  border-radius:10px;
-  background:{NAVY}; color:{WHITE};
-  display:flex; align-items:center; justify-content:center;
-  font-size:13px; font-weight:950;
+.top-brand {{
+  display:flex;
+  align-items:center;
+  gap:9px;
 }}
 
-.brand-copy {{ display:flex; flex-direction:column; }}
+.top-brand-mark {{
+  width:34px;
+  height:34px;
+  border-radius:9px;
+  background:{NAVY};
+  color:{WHITE};
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:11px;
+  font-weight:950;
+  letter-spacing:.2px;
+}}
 
-.brand-name {{
+.top-brand-copy {{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+}}
+
+.top-brand-name {{
   color:{NAVY};
-  font-size:20px;
+  font-size:14px;
   line-height:1;
   font-weight:950;
-  letter-spacing:.8px;
-  text-transform:uppercase;
+  letter-spacing:.75px;
 }}
 
-.brand-sub {{
-  color:{NAVY};
-  font-size:24px;
+.top-brand-sub {{
+  color:{MUTED};
+  font-size:9px;
   line-height:1;
-  font-weight:950;
-  letter-spacing:.4px;
+  font-weight:650;
 }}
 
-.page-pill {{
-  background:{WHITE};
+.top-slide {{
+  color:{NAVY};
   border:1px solid {LINE};
-  color:{NAVY};
   border-radius:999px;
-  padding:8px 13px;
-  font-size:12px;
-  font-weight:900;
-  letter-spacing:.4px;
+  padding:7px 11px;
+  font-size:10px;
+  line-height:1;
+  font-weight:950;
+  letter-spacing:.55px;
+}}
+
+.org-row {{
+  position:relative;
+  z-index:3;
+  display:flex;
+  align-items:flex-start;
+  margin-top:8px;
 }}
 
 .eyebrow {{
@@ -1708,40 +1774,104 @@ footer {{
   position:relative;
   z-index:4;
   margin-top:auto;
-  padding-top:13px;
-  border-top:1px solid {LINE};
-  display:grid;
-  grid-template-columns:175px minmax(0,1fr) 50px;
-  gap:12px;
-  align-items:center;
+  padding-top:12px;
 }}
 
-.footer-brand {{
+.benefit-strip {{
+  min-height:70px;
+  width:100%;
+  display:grid;
+  grid-template-columns:1fr 1px 1fr 1px 1fr;
+  align-items:center;
+  border-radius:17px;
+  background:{NAVY};
+  padding:10px 24px;
+  box-shadow:0 8px 20px rgba(11,46,89,.10);
+  overflow:hidden;
+  position:relative;
+}}
+
+.benefit-strip:after {{
+  content:"";
+  position:absolute;
+  right:-40px;
+  top:-75px;
+  width:145px;
+  height:145px;
+  border:16px solid rgba(255,255,255,.055);
+  border-radius:50%;
+}}
+
+.benefit-item {{
   display:flex;
   align-items:center;
-  gap:7px;
-  color:{NAVY};
-  font-size:12px;
-  font-weight:950;
-  letter-spacing:.7px;
+  justify-content:center;
+  gap:10px;
+  min-width:0;
+  position:relative;
+  z-index:1;
 }}
 
-.instagram-icon {{
-  width:22px; height:22px;
+.benefit-icon {{
+  width:40px;
+  height:40px;
+  flex:none;
+  border:1.5px solid rgba(228,165,28,.85);
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}}
+
+.benefit-icon svg {{
+  width:23px;
+  height:23px;
   fill:none;
-  stroke:{NAVY};
+  stroke:{WHITE};
   stroke-width:1.8;
+  stroke-linecap:round;
+  stroke-linejoin:round;
 }}
 
-.instagram-dot {{
-  fill:{NAVY};
-  stroke:none;
+.benefit-copy {{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+  color:{WHITE};
+  font-size:12px;
+  line-height:1.05;
+  font-weight:700;
+  min-width:0;
+}}
+
+.benefit-copy strong {{
+  font-weight:900;
+}}
+
+.benefit-copy span {{
+  color:#D8E6F1;
+  font-weight:650;
+}}
+
+.benefit-divider {{
+  width:1px;
+  height:36px;
+  background:rgba(255,255,255,.22);
+}}
+
+.footer-bottom {{
+  min-height:31px;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 50px;
+  gap:12px;
+  align-items:center;
+  padding-top:8px;
 }}
 
 .footer-note {{
   color:{MUTED};
-  font-size:10px;
-  line-height:1.22;
+  font-size:9px;
+  line-height:1.2;
   text-align:center;
 }}
 
@@ -1762,6 +1892,17 @@ footer {{
 
 <body>
   <div class="topbar">
+    <div class="top-brand">
+      <div class="top-brand-mark">SD</div>
+      <div class="top-brand-copy">
+        <div class="top-brand-name">SHAKTIDOOTAM</div>
+        <div class="top-brand-sub">Government Job Updates</div>
+      </div>
+    </div>
+    <div class="top-slide">SLIDE {int(number):02d} OF {int(total):02d}</div>
+  </div>
+
+  <div class="org-row">
     <div class="eyebrow">{esc(eyebrow)}</div>
   </div>
 
