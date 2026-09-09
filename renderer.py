@@ -600,6 +600,8 @@ def build_html(
         # Slide 1 is deliberately a cover: only the highest-value facts remain.
         metric = clean_text(total_vacancies)
         highlight = _hook_highlight(subtitle)
+        application_highlight = _extract_application_highlight(bullets)
+        application_start, application_end = _extract_application_dates(application_highlight)
 
         hero = f"""
         <section class="hero">
@@ -629,7 +631,7 @@ def build_html(
             <div class="hero-date-tablet hero-date-tablet-cover">
               <div class="hero-date-item">
                 <div class="hero-date-label">APPLICATION START</div>
-                <div class="hero-date-value">{esc(application_start or application_highlight)}</div>
+                <div class="hero-date-value">{esc(application_start or "—")}</div>
               </div>
               <div class="hero-date-arrow">↓</div>
               <div class="hero-date-item">
