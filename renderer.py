@@ -665,7 +665,9 @@ def build_html(
             <div class="hero-vacancy-focus">
               <div class="hero-vacancy-label">TOTAL VACANCIES</div>
               <div class="hero-vacancy-focus-row">
-                <div class="hero-stat-number">{esc(metric)}</div>
+                <div class="hero-stat-number-wrap">
+                  <div class="hero-stat-number">{esc(metric)}</div>
+                </div>
                 <div class="hero-stat-caption">VACANCIES</div>
               </div>
             </div>
@@ -688,6 +690,15 @@ def build_html(
             <div class="hero-cover-message">
               <strong>Swipe to explore</strong>
               <span>Posts • Eligibility • Dates • Application</span>
+            </div>
+
+            <div class="hero-cover-decor">
+              <div class="hero-gear gear-large">⚙</div>
+              <div class="hero-gear gear-small">⚙</div>
+              <div class="hero-cover-callout">
+                <strong>MASSIVE</strong>
+                <strong>HIRING ↗</strong>
+              </div>
             </div>
           </div>
 
@@ -1805,7 +1816,7 @@ h1 {{
 }}
 .dates-timeline .date-copy .label {{
   color:{BLUE};
-  font-size:13px;
+  font-size:15px;
   font-weight:950;
   letter-spacing:.8px;
   text-transform:uppercase;
@@ -2283,7 +2294,7 @@ h1 {{
   border:1px solid rgba(228,165,28,.42);
   border-radius:999px;
   color:{GOLD};
-  font-size:10px;
+  font-size:12px;
   line-height:1;
   font-weight:950;
   letter-spacing:1.2px;
@@ -2742,7 +2753,7 @@ h1 {{
 }}
 
 .label {{
-  font-size:12px;
+  font-size:14px;
 }}
 
 .value {{
@@ -2759,10 +2770,10 @@ h1 {{
    become microscopic. The JS fit routine handles truly dense slides. */
 .card-grid.compact .value {{ font-size:21px; }}
 .card-grid.compact .meta {{ font-size:14px; }}
-.card-grid.dense .label {{ font-size:11px; }}
+.card-grid.dense .label {{ font-size:13px; }}
 .card-grid.dense .value {{ font-size:19px; line-height:1.17; }}
 .card-grid.dense .meta {{ font-size:13px; }}
-.card-grid.ultra-dense .label {{ font-size:10px; }}
+.card-grid.ultra-dense .label {{ font-size:12px; }}
 .card-grid.ultra-dense .value {{ font-size:17px; line-height:1.15; }}
 .card-grid.ultra-dense .meta {{ font-size:12px; }}
 
@@ -2786,6 +2797,74 @@ h1 {{
   box-shadow:0 7px 18px rgba(228,165,28,.18);
 }}
 
+.hero-vacancy-focus {{
+  position:relative;
+  z-index:3;
+}}
+.hero-stat-number-wrap {{
+  display:flex;
+  align-items:center;
+  padding:5px 15px 7px;
+  border:3px solid rgba(228,165,28,.82);
+  border-radius:18px;
+  background:linear-gradient(145deg, rgba(255,255,255,.13), rgba(255,255,255,.035));
+  box-shadow:
+    inset 0 0 0 2px rgba(255,255,255,.12),
+    0 8px 18px rgba(0,0,0,.16);
+}}
+.hero-stat-number-wrap .hero-stat-number {{
+  text-shadow:0 3px 0 rgba(0,0,0,.15);
+}}
+.hero-cover-decor {{
+  position:absolute;
+  right:30px;
+  top:180px;
+  width:410px;
+  height:340px;
+  pointer-events:none;
+  z-index:1;
+}}
+.hero-gear {{
+  position:absolute;
+  color:rgba(228,165,28,.34);
+  font-family:Arial, sans-serif;
+  line-height:1;
+  filter:drop-shadow(0 2px 1px rgba(0,0,0,.08));
+}}
+.gear-large {{
+  right:80px;
+  top:70px;
+  font-size:245px;
+}}
+.gear-small {{
+  right:5px;
+  top:145px;
+  font-size:135px;
+}}
+.hero-cover-callout {{
+  position:absolute;
+  right:10px;
+  top:235px;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  padding:12px 17px 13px;
+  border-radius:15px;
+  background:linear-gradient(145deg, #F7C43A, {GOLD});
+  color:{NAVY};
+  box-shadow:0 7px 18px rgba(0,0,0,.16);
+  transform:rotate(-1deg);
+}}
+.hero-cover-callout strong {{
+  font-size:22px;
+  line-height:.92;
+  font-weight:950;
+  letter-spacing:-.5px;
+}}
+.hero-cover-callout strong:last-child {{
+  font-size:20px;
+  margin-top:2px;
+}}
 .hero-vacancy-focus {{
   margin-top:30px;
 }}
@@ -2899,7 +2978,26 @@ h1 {{
   height:132px;
 }}
 
+.hero-cover-decor {{
+  opacity:.72;
+  transform:scale(.88);
+  transform-origin:right top;
+}}
+
 /* Slide 1 — retain the vertical application-date tablet */
+.hero-date-tablet-cover {{
+  position:relative;
+  overflow:hidden;
+}}
+.hero-date-tablet-cover:after {{
+  content:"";
+  position:absolute;
+  right:68px;
+  top:16px;
+  bottom:16px;
+  width:1px;
+  background:rgba(255,255,255,.22);
+}}
 .hero-date-tablet-cover {{
   width:360px;
   min-height:150px;
@@ -2964,11 +3062,11 @@ h1 {{
 }}
 
 /* Slide 2 — recruitment snapshot */
-.snapshot-label {{ font-size:12px; }}
+.snapshot-label {{ font-size:14px; }}
 .snapshot-value {{ font-size:27px; }}
 .snapshot-meta {{ font-size:14px; }}
 
-.snapshot-feature .snapshot-label {{ font-size:14px; }}
+.snapshot-feature .snapshot-label {{ font-size:16px; }}
 .snapshot-feature .snapshot-value {{ font-size:76px; }}
 .snapshot-feature .snapshot-meta {{ font-size:15px; }}
 
@@ -2976,17 +3074,17 @@ h1 {{
 .snapshot-one .snapshot-card:first-child .snapshot-value {{ font-size:82px; }}
 
 /* Slide 3 — eligibility */
-.eligibility-code {{ font-size:11px; }}
+.eligibility-code {{ font-size:13px; }}
 .eligibility-value {{ font-size:21px; line-height:1.18; }}
 .eligibility-meta {{ font-size:13px; }}
 
 .eligibility-few .eligibility-value {{ font-size:30px; }}
 .eligibility-medium .eligibility-value {{ font-size:20px; }}
 .eligibility-many .eligibility-value {{ font-size:18px; }}
-.eligibility-many .eligibility-code {{ font-size:10px; }}
+.eligibility-many .eligibility-code {{ font-size:12px; }}
 
 /* Slide 4 — fees / selection / pay */
-.fee-primary-card .label {{ font-size:12px; }}
+.fee-primary-card .label {{ font-size:14px; }}
 .fee-primary-card .value {{ font-size:34px; }}
 .fee-secondary-grid .value {{ font-size:21px; }}
 
@@ -3007,7 +3105,7 @@ h1 {{
 }}
 
 .date-list .label {{
-  font-size:12px;
+  font-size:14px;
 }}
 
 .date-list .meta {{
@@ -3022,6 +3120,13 @@ h1 {{
 .checklist-panel .bullet-check {{
   width:29px;
   height:29px;
+}}
+
+.section-kicker {{
+  font-size:14px;
+  line-height:1.15;
+  font-weight:950;
+  letter-spacing:.8px;
 }}
 
 /* Slide 6 — official notification */
