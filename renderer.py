@@ -260,6 +260,37 @@ def _extract_vacancy_total(deck):
     return candidates[0] if candidates else ""
 
 
+def _extract_application_url(deck):
+    """Find the most likely application/form URL for the Slide 1 QR."""
+    candidates = []
+    for slide in (deck.get("slides") or []) if isinstance(deck, dict) else []:
+        if not isinstance(slide, dict):
+            continue
+        for card in (slide.get("cards") or []):
+            if not isinstance(card, dict):
+                continue
+            url = clean_text(card.get("value") or card.get("url") or card.get("link"))
+            if not re.match(r"^https?://", url, re.I):
+                continue
+            label = clean_text(card.get("label")).lower()
+            score = 0
+            if any(k in label for k in ("apply", "application", "online form", "registration")):
+                score += 10
+            if any(k in url.lower() for k in ("apply", "application", "registration", "register", "online-form", "form")):
+                score += 5
+            candidates.append((score, url))
+    if not candidates:
+        return ""
+    candidates.sort(key=lambda x: x[0], reverse=True)
+    return candidates[0][1]
+
+
+def _extract_application_dates(text):
+    """Extract the first two dates from an application-window string."""
+    dates = re.findall(r"\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b", clean_text(text))
+    return (dates[0], dates[1]) if len(dates) >= 2 else ("", "")
+
+
 def _extract_application_highlight(bullets):
     """Use the supplied application/date bullet without inventing dates."""
     for bullet in bullets:
@@ -473,7 +504,8 @@ def build_html(
     total,
     theme="professional_white",
     total_vacancies="",
-    organisation=""
+    organisation="",
+    application_url=""
 ):
     """
     Existing deck contract from carousel.py:
@@ -556,6 +588,7 @@ def build_html(
         metric = clean_text(total_vacancies)
 
         application_highlight = _extract_application_highlight(bullets)
+        application_start, application_end = _extract_application_dates(application_highlight)
 
         remaining_bullets = [
             b for b in bullets
@@ -593,13 +626,31 @@ def build_html(
             """ if metric else ""}
 
             {f"""
-            <div class="hero-date-pill">
-              <span class="hero-date-icon">▣</span>
-              <span>{esc(application_highlight)}</span>
+            <div class="hero-application-row">
+              <div class="hero-date-tablet">
+                <div class="hero-date-item">
+                  <div class="hero-date-label">APPLICATION START</div>
+                  <div class="hero-date-value">{esc(application_start or application_highlight)}</div>
+                </div>
+                <div class="hero-date-arrow">↓</div>
+                <div class="hero-date-item">
+                  <div class="hero-date-label">APPLICATION END</div>
+                  <div class="hero-date-value">{esc(application_end or "—")}</div>
+                </div>
+              </div>
+              {(
+                '<div class="hero-qr-card">'
+                '<div class="hero-qr-copy">'
+                '<div class="hero-qr-label">APPLY ONLINE</div>'
+                '<div class="hero-qr-title">Scan to open the<br>application form</div>'
+                f'<div class="hero-qr-url">{esc(application_url)}</div>'
+                '</div>'
+                f'<img class="hero-qr-image" src="{qr_data_uri(application_url)}" alt="Application QR code">'
+                '</div>'
+              ) if application_url else ""}
             </div>
             """ if application_highlight else ""}
 
-            {f'<div class="hero-info-grid">{hero_points}</div>' if hero_points else ""}
           </div>
 
           <div class="hero-callout">
@@ -1958,6 +2009,113 @@ h1 {{
   padding-bottom:6px;
 }}
 
+.hero-application-row {{
+  display:flex;
+  align-items:stretch;
+  gap:16px;
+  margin-top:25px;
+  max-width:890px;
+}}
+
+.hero-date-tablet {{
+  width:310px;
+  min-height:215px;
+  flex:none;
+  padding:18px 20px;
+  border:1px solid rgba(255,255,255,.24);
+  border-radius:20px;
+  background:rgba(255,255,255,.065);
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}}
+
+.hero-date-item {{
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+}}
+
+.hero-date-label {{
+  color:{GOLD};
+  font-size:11px;
+  line-height:1;
+  font-weight:950;
+  letter-spacing:1.25px;
+}}
+
+.hero-date-value {{
+  color:{WHITE};
+  font-size:25px;
+  line-height:1.08;
+  font-weight:900;
+  letter-spacing:-.4px;
+}}
+
+.hero-date-arrow {{
+  color:{GOLD};
+  font-size:30px;
+  line-height:.8;
+  font-weight:900;
+  margin:7px 0;
+  padding-left:2px;
+}}
+
+.hero-qr-card {{
+  min-width:0;
+  flex:1;
+  min-height:215px;
+  padding:17px 18px;
+  border:1px solid rgba(228,165,28,.55);
+  border-radius:20px;
+  background:rgba(255,255,255,.09);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:15px;
+}}
+
+.hero-qr-copy {{
+  min-width:0;
+  flex:1;
+}}
+
+.hero-qr-label {{
+  color:{GOLD};
+  font-size:11px;
+  line-height:1;
+  font-weight:950;
+  letter-spacing:1.3px;
+}}
+
+.hero-qr-title {{
+  color:{WHITE};
+  font-size:20px;
+  line-height:1.12;
+  font-weight:900;
+  margin-top:9px;
+}}
+
+.hero-qr-url {{
+  color:#BFD5E5;
+  font-size:10px;
+  line-height:1.25;
+  margin-top:10px;
+  overflow-wrap:anywhere;
+  max-height:38px;
+  overflow:hidden;
+}}
+
+.hero-qr-image {{
+  width:145px;
+  height:145px;
+  flex:none;
+  padding:7px;
+  border-radius:14px;
+  background:{WHITE};
+  object-fit:contain;
+}}
+
 .hero-date-pill {{
   width:max-content;
   max-width:890px;
@@ -2320,6 +2478,27 @@ h1 {{
   font-size:26px;
 }}
 
+.hero-application-row {{
+  gap:14px;
+  margin-top:22px;
+}}
+.hero-date-tablet {{
+  width:300px;
+  min-height:205px;
+  padding:16px 18px;
+}}
+.hero-date-value {{ font-size:24px; }}
+.hero-date-arrow {{ font-size:29px; }}
+.hero-qr-card {{
+  min-height:205px;
+  padding:15px 16px;
+}}
+.hero-qr-title {{ font-size:19px; }}
+.hero-qr-image {{
+  width:132px;
+  height:132px;
+}}
+
 /* Slide 2 — recruitment snapshot */
 .snapshot-label {{ font-size:12px; }}
 .snapshot-value {{ font-size:27px; }}
@@ -2680,6 +2859,7 @@ async def render(deck, out):
         total = len(slides)
         vacancy_total = _extract_vacancy_total(deck)
         organisation = _infer_organisation_from_context(deck)
+        application_url = _extract_application_url(deck)
 
         # Repair a common upstream mapping error without changing the source
         # facts: if Slide 1's eyebrow contains a qualification instead of the
@@ -2709,6 +2889,7 @@ async def render(deck, out):
                     total,
                     total_vacancies=vacancy_total,
                     organisation=organisation,
+                    application_url=application_url,
                 ),
                 wait_until="load",
             )

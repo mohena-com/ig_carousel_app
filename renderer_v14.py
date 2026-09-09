@@ -272,7 +272,209 @@ def _extract_application_highlight(bullets):
             return b
     return ""
 
-def build_html(slide, total, theme="professional_white", total_vacancies=""):
+def _looks_like_qualification(text):
+    """Detect qualification/eligibility text accidentally placed in the eyebrow."""
+    s = clean_text(text).lower()
+    if not s:
+        return False
+    patterns = (
+        r"\b(b\.?\s*tech|b\.?\s*e\.?|m\.?\s*tech|m\.?\s*e\.?|mca|mba|m\.c\.a)\b",
+        r"\b(bachelor|master|degree|diploma|ph\.?d)\b",
+        r"\b(qualification|recognized university|recognised university)\b",
+        r"\bminimum\s+\d+\s*%",
+        r"\bmarks\b|\bcgpa\b",
+        r"\bany\s+(recognized|recognised)\s+university\b",
+    )
+    return any(re.search(p, s, re.I) for p in patterns)
+
+
+_PORTAL_HOSTS = {
+    "sarkariresult.com",
+    "sarkariresult.org",
+    "freejobalert.com",
+    "jagranjosh.com",
+    "careerpower.in",
+    "adda247.com",
+    "testbook.com",
+    "rojgarresult.com",
+    "indgovtjobs.in",
+    "fresherslive.com",
+    "govtjobguru.in",
+    "naukrinama.com",
+    "jobapply.in",
+    "sarkariexam.com",
+    "india.gov.in",
+    "gov.in",  # handled as a suffix below
+}
+
+
+def _iter_deck_urls(deck):
+    """Collect URLs from cards/bullets without assuming a particular slide layout."""
+    urls = []
+    if not isinstance(deck, dict):
+        return urls
+
+    for slide in (deck.get("slides") or []):
+        if not isinstance(slide, dict):
+            continue
+
+        for card in (slide.get("cards") or []):
+            if not isinstance(card, dict):
+                continue
+            for key in ("value", "url", "link"):
+                value = clean_text(card.get(key))
+                if re.match(r"^https?://", value, re.I):
+                    urls.append(value)
+
+        for bullet in (slide.get("bullets") or []):
+            value = clean_text(bullet)
+            urls.extend(re.findall(r"https?://[^\s<>\"]+", value, re.I))
+
+    # Preserve order while removing duplicates.
+    return list(dict.fromkeys(urls))
+
+
+def _url_host(url):
+    m = re.match(r"^https?://([^/]+)", clean_text(url), re.I)
+    return m.group(1).lower().split(":")[0] if m else ""
+
+
+def _is_job_portal_host(host):
+    if not host:
+        return False
+    host = host.lower().lstrip("www.")
+    if host in _PORTAL_HOSTS:
+        return True
+    if host.endswith(".gov.in") or host.endswith(".nic.in"):
+        # A government domain is not automatically a recruitment portal.
+        # It remains a useful source-domain clue, not a guaranteed org name.
+        return False
+    return any(host.endswith("." + p) for p in _PORTAL_HOSTS if "." in p)
+
+
+def _org_from_url(url):
+    """
+    Extract a conservative organisation candidate from a URL.
+
+    We deliberately do NOT turn a job-portal hostname into an organisation.
+    Path/slug terms are only used when they strongly resemble an organisation
+    and are not generic recruitment/job words.
+    """
+    host = _url_host(url)
+    if not host or _is_job_portal_host(host):
+        return ""
+
+    # Hostname candidate: nic.in/gov.in subdomains often identify the authority.
+    host_parts = host.split(".")
+    if len(host_parts) >= 3:
+        candidate = host_parts[-3]
+    else:
+        candidate = host_parts[0]
+
+    generic = {
+        "www", "apply", "recruitment", "career", "careers", "jobs", "job",
+        "online", "portal", "vacancy", "vacancies", "notice", "notices",
+        "login", "registration", "reg", "exam", "admit", "result", "results",
+        "official", "notification", "notifications", "portal",
+    }
+    if candidate and candidate.lower() not in generic:
+        return candidate.replace("-", " ").replace("_", " ").strip()
+
+    # Fall back to a meaningful URL path segment.
+    path = re.sub(r"^https?://[^/]+/?", "", clean_text(url), flags=re.I)
+    for segment in re.split(r"[/_\-]+", path):
+        seg = re.sub(r"\.(pdf|html?|php)$", "", segment, flags=re.I).strip()
+        if (
+            len(seg) >= 3
+            and seg.lower() not in generic
+            and not re.fullmatch(r"\d+", seg)
+            and not re.search(r"\b(202[0-9]|20[0-9]{2})\b", seg)
+        ):
+            return seg.replace("-", " ").replace("_", " ").strip()
+
+    return ""
+
+
+def _looks_like_organisation(text):
+    """Score obvious organisation-name shapes without pretending every title is one."""
+    s = clean_text(text)
+    low = s.lower()
+    if not s or _looks_like_qualification(s):
+        return False
+
+    bad = (
+        "recruitment", "vacancy", "vacancies", "notification", "application",
+        "apply online", "main exam", "admit card", "result", "answer key",
+        "job", "career", "government job", "online form",
+    )
+    if any(x in low for x in bad):
+        return False
+
+    # Strong institutional markers.
+    strong = (
+        "bank", "limited", "ltd", "corporation", "commission", "board",
+        "authority", "university", "institute", "organisation", "organization",
+        "department", "ministry", "railway", "selection", "service",
+        "research", "space", "fertilizer", "chemical",
+    )
+    if any(x in low for x in strong):
+        return True
+
+    # Acronym-heavy names such as "ISRO", "NIC", "IBPS".
+    words = re.findall(r"[A-Za-z][A-Za-z&.()'-]*", s)
+    return len(words) <= 8 and any(
+        len(w.strip("().")) >= 2 and w.strip("().").isupper()
+        for w in words
+    )
+
+
+def _infer_organisation_from_context(deck):
+    """
+    Conservative fallback chain:
+      1) explicit deck organisation fields
+      2) a plausible slide eyebrow
+      3) a plausible organisation-looking URL candidate
+
+    Portal URLs are never blindly displayed as the employer name.
+    """
+    explicit = _organisation_from_deck(deck)
+    if explicit and not _looks_like_qualification(explicit):
+        return explicit
+
+    for slide in (deck.get("slides") or []):
+        if not isinstance(slide, dict):
+            continue
+        candidate = clean_text(slide.get("eyebrow"))
+        if candidate and _looks_like_organisation(candidate):
+            return candidate
+
+    for url in _iter_deck_urls(deck):
+        candidate = _org_from_url(url)
+        if candidate and _looks_like_organisation(candidate):
+            return candidate
+
+    return ""
+
+
+def _organisation_from_deck(deck):
+    """Prefer the authoritative deck-level organisation over slide eyebrow data."""
+    if not isinstance(deck, dict):
+        return ""
+    return clean_text(
+        deck.get("organisation")
+        or deck.get("organization")
+        or deck.get("recruitment_organisation")
+        or deck.get("recruitment_organization")
+    )
+
+
+def build_html(
+    slide,
+    total,
+    theme="professional_white",
+    total_vacancies="",
+    organisation=""
+):
     """
     Existing deck contract from carousel.py:
       slide_number, slide_type, title, eyebrow, subtitle,
@@ -282,7 +484,8 @@ def build_html(slide, total, theme="professional_white", total_vacancies=""):
     stype = _normalise_type(slide.get("slide_type"))
     number = slide.get("slide_number") or 1
     title = clean_text(slide.get("title")) or "Recruitment Update"
-    eyebrow = clean_text(slide.get("eyebrow")) or "Government Recruitment"
+    raw_eyebrow = clean_text(slide.get("eyebrow"))
+    eyebrow = clean_text(organisation) or raw_eyebrow or "Government Recruitment"
     subtitle = clean_text(slide.get("subtitle"))
     bullets = [
         clean_text(x)
@@ -421,18 +624,41 @@ def build_html(slide, total, theme="professional_white", total_vacancies=""):
             snapshot_html = "".join(
                 _snapshot_card_html(card, i) for i, card in enumerate(cards)
             )
-            snapshot_mode = (
-                "snapshot-one" if len(cards) == 1
-                else "snapshot-two" if len(cards) == 2
-                else "snapshot-many"
-            )
+            if len(cards) == 1:
+                snapshot_mode = "snapshot-one"
+            elif len(cards) == 2:
+                snapshot_mode = "snapshot-two"
+            elif len(cards) >= 11:
+                snapshot_mode = "snapshot-many snapshot-extra-dense"
+            else:
+                snapshot_mode = "snapshot-many"
             body = f'<div class="snapshot-grid {snapshot_mode}">{snapshot_html}</div>'
 
         elif stype == "eligibility":
             # Post-wise eligibility can contain many long qualifications.
             # Use a responsive 2-column card layout so all supplied content
             # stays inside the 1080x1350 canvas instead of stacking forever.
-            eligibility_count = len(cards)
+            moved_qualification = clean_text(slide.get("_moved_qualification"))
+            eligibility_cards_source = list(cards)
+
+            if moved_qualification:
+                duplicate = any(
+                    moved_qualification.lower() in clean_text(c.get("value")).lower()
+                    or clean_text(c.get("value")).lower() in moved_qualification.lower()
+                    for c in eligibility_cards_source
+                    if isinstance(c, dict)
+                )
+                if not duplicate:
+                    eligibility_cards_source.insert(
+                        0,
+                        {
+                            "label": "QUALIFICATION / ELIGIBILITY",
+                            "value": moved_qualification,
+                            "meta": "",
+                        },
+                    )
+
+            eligibility_count = len(eligibility_cards_source)
             compact = eligibility_count >= 4
             eligibility_density = (
                 "eligibility-many" if eligibility_count >= 6
@@ -441,7 +667,7 @@ def build_html(slide, total, theme="professional_white", total_vacancies=""):
             )
             eligibility_cards = "".join(
                 _eligibility_card_html(card, i, compact=compact)
-                for i, card in enumerate(cards)
+                for i, card in enumerate(eligibility_cards_source)
             )
 
             body = f"""
@@ -2234,6 +2460,123 @@ h1 {{
   font-size:13px;
 }}
 
+
+/* ============================================================
+   SLIDE 2 — MOBILE DENSE POST CARDS
+   More information should fit by reducing card chrome/spacing,
+   NOT by making the post name microscopic.
+   ============================================================ */
+
+/* Many-post slides: compact the cards vertically while keeping
+   the actual post title strong and readable. */
+.snapshot-many {{
+  gap:11px;
+  grid-auto-rows:minmax(108px, auto);
+}}
+
+.snapshot-many .snapshot-card {{
+  min-height:108px;
+  padding:14px 16px;
+  border-radius:16px;
+}}
+
+.snapshot-many .snapshot-card:nth-child(2),
+.snapshot-many .snapshot-card:nth-child(3) {{
+  min-height:108px;
+}}
+
+.snapshot-many .snapshot-card:nth-child(4) {{
+  min-height:100px;
+  border-top-width:3px;
+}}
+
+.snapshot-many .snapshot-index {{
+  top:12px;
+  right:13px;
+  width:27px;
+  height:27px;
+  font-size:8px;
+}}
+
+.snapshot-many .snapshot-copy {{
+  padding-right:30px;
+}}
+
+.snapshot-many .snapshot-label {{
+  font-size:11px;
+  line-height:1.08;
+  letter-spacing:.65px;
+}}
+
+.snapshot-many .snapshot-value {{
+  font-size:25px;
+  line-height:1.08;
+  margin-top:5px;
+}}
+
+.snapshot-many .snapshot-meta {{
+  font-size:12px;
+  line-height:1.18;
+  margin-top:4px;
+}}
+
+/* Extra-dense: preserve a readable title but remove more vertical
+   chrome. Content is allowed to grow naturally if a title wraps. */
+.snapshot-many.snapshot-extra-dense .snapshot-card {{
+  min-height:96px;
+  padding:12px 14px;
+}}
+
+.snapshot-many.snapshot-extra-dense .snapshot-value {{
+  font-size:23px;
+  line-height:1.06;
+}}
+
+.snapshot-many.snapshot-extra-dense .snapshot-label {{
+  font-size:10px;
+}}
+
+.snapshot-many.snapshot-extra-dense .snapshot-index {{
+  width:25px;
+  height:25px;
+  top:10px;
+  right:11px;
+}}
+
+/* Two-card slides can also be tighter; this prevents an unusually
+   long post title from consuming excessive vertical space. */
+.snapshot-two {{
+  gap:13px;
+}}
+
+.snapshot-two .snapshot-card {{
+  min-height:205px;
+  padding:18px 19px;
+}}
+
+.snapshot-two .snapshot-card:first-child .snapshot-value {{
+  font-size:68px;
+}}
+
+/* The post title is the important information — make it stronger
+   than the small category label. */
+.snapshot-card:not(.snapshot-feature) .snapshot-value {{
+  font-size:27px;
+  line-height:1.08;
+}}
+
+.snapshot-card:not(.snapshot-feature) .snapshot-label {{
+  font-size:12px;
+}}
+
+/* Long titles get slightly tighter line spacing rather than being
+   clipped or pushed underneath the footer. */
+.snapshot-card .snapshot-value {{
+  overflow-wrap:break-word;
+  word-break:normal;
+  hyphens:auto;
+}}
+
 </style>
 </head>
 
@@ -2336,12 +2679,37 @@ async def render(deck, out):
 
         total = len(slides)
         vacancy_total = _extract_vacancy_total(deck)
+        organisation = _infer_organisation_from_context(deck)
+
+        # Repair a common upstream mapping error without changing the source
+        # facts: if Slide 1's eyebrow contains a qualification instead of the
+        # organisation, move that qualification to the eligibility slide.
+        moved_qualification = ""
+        hook_slide = next(
+            (s for s in slides if _normalise_type(s.get("slide_type")) == "hook"),
+            None,
+        )
+        if hook_slide:
+            raw_eyebrow = clean_text(hook_slide.get("eyebrow"))
+            if _looks_like_qualification(raw_eyebrow):
+                moved_qualification = raw_eyebrow
+
+        if moved_qualification:
+            for s in slides:
+                if _normalise_type(s.get("slide_type")) == "eligibility":
+                    s["_moved_qualification"] = moved_qualification
+                    break
 
         for s in slides:
             slide_no = int(s.get("slide_number") or 1)
 
             await page.set_content(
-                build_html(s, total, total_vacancies=vacancy_total),
+                build_html(
+                    s,
+                    total,
+                    total_vacancies=vacancy_total,
+                    organisation=organisation,
+                ),
                 wait_until="load",
             )
 
