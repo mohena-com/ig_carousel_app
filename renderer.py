@@ -112,6 +112,49 @@ def _snapshot_card_html(card, index=0):
     """
 
 
+def _eligibility_tags_html(value):
+    s = clean_text(value)
+    tags = []
+    degree_patterns = [
+        r"\bB\.?\s*\.?(?:Tech|E)\b",
+        r"\bM\.?\s*\.?(?:Tech|E)\b",
+        r"\bMBA\b", r"\bMCA\b", r"\bBCA\b", r"\bBBA\b",
+        r"\bBachelor(?:'s)?\s+Degree\b",
+        r"\bEngineering\s+Degree\b",
+        r"\bDiploma\b", r"\bITI\b",
+        r"\bChartered\s+Accountant\b",
+        r"\bCompany\s+Secretary\b",
+        r"\bGraduate\b", r"\bPost\s+Graduate\b",
+    ]
+    qualification = ""
+    for pattern in degree_patterns:
+        m = re.search(pattern, s, re.I)
+        if m:
+            qualification = m.group(0)
+            break
+    if qualification:
+        tags.append(("Q", "QUALIFICATION", qualification))
+
+    marks = re.search(r"\b(\d{1,3})\s*%\s*(?:marks|aggregate)?", s, re.I)
+    if marks:
+        tags.append(("%", "MIN. MARKS", f"{marks.group(1)}%"))
+
+    experience = re.search(r"\b(\d+(?:\.\d+)?)\s*(Years?|Months?)\b", s, re.I)
+    if experience and re.search(r"\bexperience\b", s, re.I):
+        tags.append(("E", "EXPERIENCE", experience.group(0)))
+
+    return "".join(
+        f"""
+        <span class="eligibility-tag">
+          <span class="eligibility-tag-icon">{esc(icon)}</span>
+          <span class="eligibility-tag-label">{esc(label)}</span>
+          <strong>{esc(val)}</strong>
+        </span>
+        """
+        for icon, label, val in tags
+    )
+
+
 def _eligibility_card_html(card, index=0, compact=False):
     """Compact post-wise eligibility card that keeps all supplied text visible."""
     label = clean_text(card.get("label")) or "Post"
@@ -124,6 +167,7 @@ def _eligibility_card_html(card, index=0, compact=False):
         <span class="card-dot"></span>
         <span class="eligibility-code">{esc(label)}</span>
       </div>
+      {f'<div class="eligibility-tags">{_eligibility_tags_html(value)}</div>' if value else ""}
       <div class="eligibility-value">{esc(value) if value else "—"}</div>
       {f'<div class="eligibility-meta">{esc(meta)}</div>' if meta else ""}
     </article>
@@ -670,7 +714,12 @@ def build_html(
                 snapshot_mode = "snapshot-many snapshot-extra-dense"
             else:
                 snapshot_mode = "snapshot-many"
-            body = f'<div class="snapshot-grid {snapshot_mode}">{snapshot_html}</div>'
+            posts_layout = (
+                "posts-one" if len(cards) == 1
+                else "posts-two" if len(cards) == 2
+                else "posts-many"
+            )
+            body = f'<div class="snapshot-grid {snapshot_mode} posts-v2 {posts_layout}">{snapshot_html}</div>'
 
         elif stype == "eligibility":
             # Post-wise eligibility can contain many long qualifications.
@@ -1352,6 +1401,74 @@ h1 {{
 .snapshot-many {{
   grid-template-columns:1.05fr .95fr;
 }}
+.snapshot-grid.posts-v2 {{
+  grid-template-rows:auto;
+  gap:13px;
+}}
+.posts-v2 .snapshot-card {{
+  min-height:128px;
+  padding:17px 18px;
+  justify-content:center;
+}}
+.posts-v2 .snapshot-card:after {{
+  width:135px;
+  height:135px;
+  right:-58px;
+  bottom:-62px;
+  border-width:14px;
+}}
+.posts-v2 .snapshot-index {{
+  top:12px;
+  right:13px;
+  width:26px;
+  height:26px;
+  font-size:8px;
+}}
+.posts-v2 .snapshot-label {{
+  font-size:10px;
+  line-height:1.15;
+  padding-right:30px;
+}}
+.posts-v2 .snapshot-value {{
+  font-size:35px;
+  line-height:1;
+  margin-top:6px;
+  letter-spacing:-1px;
+}}
+.posts-v2 .snapshot-meta {{
+  font-size:11px;
+  margin-top:5px;
+}}
+.posts-v2.posts-many {{
+  grid-template-columns:repeat(3,1fr);
+}}
+.posts-v2.posts-many .snapshot-card {{
+  min-height:122px;
+}}
+.posts-v2.posts-many .snapshot-card:first-child {{
+  grid-row:auto;
+}}
+.posts-v2.posts-many .snapshot-card:first-child .snapshot-value {{
+  font-size:40px;
+}}
+.posts-v2.posts-two {{
+  grid-template-columns:1fr 1fr;
+}}
+.posts-v2.posts-two .snapshot-card {{
+  min-height:185px;
+}}
+.posts-v2.posts-two .snapshot-card:first-child .snapshot-value {{
+  font-size:50px;
+}}
+.posts-v2.posts-one {{
+  grid-template-columns:1fr;
+}}
+.posts-v2.posts-one .snapshot-card {{
+  min-height:220px;
+}}
+.posts-v2.posts-one .snapshot-card:first-child .snapshot-value {{
+  font-size:64px;
+}}
 
 /* SLIDE 3 — ELIGIBILITY */
 .eligibility-layout {{
@@ -1405,6 +1522,47 @@ h1 {{
   text-transform:uppercase;
 }}
 
+.eligibility-tags {{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  margin:0 0 9px;
+}}
+.eligibility-tag {{
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  padding:5px 8px;
+  border-radius:999px;
+  background:{SOFT_BLUE};
+  color:{NAVY};
+  font-size:9px;
+  line-height:1;
+  font-weight:800;
+  white-space:nowrap;
+}}
+.eligibility-tag-icon {{
+  width:16px;
+  height:16px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:{NAVY};
+  color:{GOLD};
+  font-size:8px;
+  font-weight:950;
+}}
+.eligibility-tag-label {{
+  color:{BLUE};
+  font-size:8px;
+  font-weight:950;
+  letter-spacing:.45px;
+}}
+.eligibility-tag strong {{
+  font-size:10px;
+  font-weight:950;
+}}
 .eligibility-value {{
   color:{INK};
   font-size:19px;
