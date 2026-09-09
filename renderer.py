@@ -218,7 +218,7 @@ def _date_card_html(card, index=0):
     value = clean_text(card.get("value"))
     meta = clean_text(card.get("meta"))
     return f"""
-    <div class="date-row{' correction-row' if 'correction' in label.lower() else ''}">
+    <div class="date-row{' correction-row' if 'correction' in label.lower() else ''}{' long-date-row' if len(label) > 18 or len(value) > 24 else ''}">
       <div class="date-marker">{index + 1}</div>
       <div class="date-copy">
         <div class="label">{esc(label)}</div>
@@ -330,9 +330,13 @@ def _extract_application_url(deck):
 
 
 def _extract_application_dates(text):
-    """Extract the first two dates from an application-window string."""
-    dates = re.findall(r"\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b", clean_text(text))
-    return (dates[0], dates[1]) if len(dates) >= 2 else ("", "")
+    """Extract available application dates, including ISO dates."""
+    value = clean_text(text)
+    dates = re.findall(
+        r"\b(?:\d{1,2}[/-]\d{1,2}[/-]\d{2,4}|20\d{2}-\d{2}-\d{2})\b",
+        value,
+    )
+    return (dates[0], dates[1]) if len(dates) >= 2 else ((dates[0], "") if dates else ("", ""))
 
 
 def _hook_highlight(subtitle):
@@ -573,6 +577,10 @@ def build_html(
     stype = _normalise_type(slide.get("slide_type"))
     number = slide.get("slide_number") or 1
     title = clean_text(slide.get("title")) or "Recruitment Update"
+    # Keep the standard, user-facing title for the final links/CTA slide.
+    # The third CTA card can still say "TAP LINK IN BIO".
+    if stype == "links":
+        title = "Official Links & How to Apply"
     raw_eyebrow = clean_text(slide.get("eyebrow"))
     eyebrow = clean_text(organisation) or raw_eyebrow or "Government Recruitment"
     subtitle = clean_text(slide.get("subtitle"))
@@ -676,16 +684,18 @@ def build_html(
             {f"""
             <div class="hero-date-tablet hero-date-tablet-cover">
               <div class="hero-date-item">
-                <div class="hero-date-label">APPLICATION START</div>
-                <div class="hero-date-value">{esc(application_start or "—")}</div>
+                <div class="hero-date-label">{"APPLICATION START" if application_end else "APPLICATION DEADLINE"}</div>
+                <div class="hero-date-value">{esc(application_start or application_end)}</div>
               </div>
+              {f"""
               <div class="hero-date-arrow">↓</div>
               <div class="hero-date-item">
                 <div class="hero-date-label">APPLICATION END</div>
-                <div class="hero-date-value">{esc(application_end or "—")}</div>
+                <div class="hero-date-value">{esc(application_end)}</div>
               </div>
+              """ if application_end else ""}
             </div>
-            """ if application_highlight else ""}
+            """ if application_start or application_end else ""}
 
             <div class="hero-cover-message">
               <strong>Swipe to explore</strong>
@@ -2013,6 +2023,24 @@ h1 {{
   white-space:normal;
   overflow-wrap:anywhere;
   text-wrap:balance;
+}}
+
+/* Any long timeline value gets its own compact, wrapping treatment. */
+.dates-step-timeline .long-date-row .date-copy {{
+  padding:12px 18px;
+}}
+
+.dates-step-timeline .long-date-row .date-value {{
+  font-size:21px;
+  line-height:1.12;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  word-break:normal;
+  text-wrap:balance;
+}}
+
+.dates-step-timeline .long-date-row .date-copy .label {{
+  margin-bottom:2px;
 }}
 
 .dates-step-timeline .correction-row .date-marker {{
