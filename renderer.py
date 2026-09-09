@@ -810,15 +810,32 @@ def build_html(
 
         elif stype == "dates":
             body = f"""
-            <div class="dates-v2">
-              <section class="dates-timeline-card">
-                <div class="section-kicker">APPLICATION SCHEDULE</div>
-                <div class="dates-timeline">{cards_html}</div>
-                <div class="dates-status">
-                  <span class="status-dot"></span>
-                  <strong>APPLICATIONS OPEN NOW!</strong>
+            <div class="dates-v3">
+              <section class="dates-hero-panel">
+                <div class="dates-hero-top">
+                  <div>
+                    <div class="dates-hero-kicker">APPLICATION SCHEDULE</div>
+                    <div class="dates-hero-title">Important Dates</div>
+                  </div>
+                  <div class="dates-live-badge">
+                    <span class="dates-live-dot"></span>
+                    APPLICATIONS OPEN
+                  </div>
+                </div>
+
+                <div class="dates-step-timeline">
+                  {cards_html}
+                </div>
+
+                <div class="dates-open-banner">
+                  <div class="dates-open-icon">✓</div>
+                  <div>
+                    <div class="dates-open-title">APPLICATIONS OPEN NOW!</div>
+                    <div class="dates-open-subtitle">Apply before the deadline shown above.</div>
+                  </div>
                 </div>
               </section>
+
               {_checklist_panel_html(bullets, "BEFORE YOU SUBMIT")}
             </div>
             """
@@ -1741,6 +1758,259 @@ h1 {{
   border:1px solid {LINE};
   border-radius:16px;
   padding:15px 19px;
+}}
+
+
+/* SLIDE 5 — DATES V3 / SAMPLE-INSPIRED */
+.dates-v3 {{
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}}
+
+.dates-hero-panel {{
+  position:relative;
+  overflow:hidden;
+  border-radius:24px;
+  background:{NAVY};
+  color:{WHITE};
+  padding:27px 34px 25px;
+  box-shadow:0 14px 30px rgba(11,46,89,.14);
+}}
+
+.dates-hero-panel:before {{
+  content:"";
+  position:absolute;
+  width:380px;
+  height:380px;
+  right:-210px;
+  top:-220px;
+  border:38px solid rgba(255,255,255,.065);
+  border-radius:50%;
+}}
+
+.dates-hero-panel:after {{
+  content:"";
+  position:absolute;
+  width:250px;
+  height:250px;
+  left:-180px;
+  bottom:-175px;
+  border:30px solid rgba(228,165,28,.09);
+  border-radius:50%;
+}}
+
+.dates-hero-top,
+.dates-step-timeline,
+.dates-open-banner {{
+  position:relative;
+  z-index:2;
+}}
+
+.dates-hero-top {{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:18px;
+}}
+
+.dates-hero-kicker {{
+  color:{GOLD};
+  font-size:12px;
+  font-weight:950;
+  letter-spacing:1.1px;
+  text-transform:uppercase;
+}}
+
+.dates-hero-title {{
+  margin-top:5px;
+  color:{WHITE};
+  font-size:31px;
+  line-height:1;
+  font-weight:950;
+}}
+
+.dates-live-badge {{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  flex:none;
+  padding:8px 11px;
+  border:1px solid rgba(228,165,28,.65);
+  border-radius:999px;
+  color:{GOLD};
+  font-size:10px;
+  font-weight:950;
+  letter-spacing:.55px;
+}}
+
+.dates-live-dot {{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:#55B56A;
+  box-shadow:0 0 0 3px rgba(85,181,106,.14);
+}}
+
+.dates-step-timeline {{
+  width:700px;
+  max-width:100%;
+  margin:26px auto 0;
+  padding:0 8px;
+}}
+
+.dates-step-timeline .date-row {{
+  position:relative;
+  display:grid;
+  grid-template-columns:1fr 70px 1fr;
+  align-items:center;
+  min-height:118px;
+  padding:0;
+}}
+
+.dates-step-timeline .date-row:not(:last-child):before {{
+  content:"";
+  position:absolute;
+  left:50%;
+  top:59px;
+  bottom:-1px;
+  width:4px;
+  transform:translateX(-50%);
+  background:linear-gradient({BLUE}, {GOLD});
+  border-radius:4px;
+}}
+
+.dates-step-timeline .date-marker {{
+  grid-column:2;
+  grid-row:1;
+  justify-self:center;
+  width:52px;
+  height:52px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:{NAVY};
+  color:{WHITE};
+  border:4px solid {GOLD};
+  box-shadow:0 0 0 5px rgba(228,165,28,.12);
+  font-size:13px;
+  font-weight:950;
+  z-index:3;
+}}
+
+.dates-step-timeline .date-row:first-child .date-marker {{
+  border-color:#55B56A;
+  box-shadow:0 0 0 5px rgba(85,181,106,.12);
+}}
+
+.dates-step-timeline .date-copy {{
+  grid-column:1;
+  grid-row:1;
+  justify-self:end;
+  width:100%;
+  max-width:270px;
+  padding:14px 22px;
+  border:1px solid rgba(255,255,255,.18);
+  border-radius:15px;
+  background:rgba(255,255,255,.075);
+  text-align:right;
+}}
+
+.dates-step-timeline .date-row:nth-child(2) .date-copy {{
+  grid-column:3;
+  justify-self:start;
+  text-align:left;
+  border-color:rgba(228,165,28,.55);
+  background:rgba(228,165,28,.10);
+}}
+
+.dates-step-timeline .date-copy .label {{
+  color:{GOLD};
+  font-size:13px;
+  font-weight:950;
+  letter-spacing:.65px;
+  text-transform:uppercase;
+}}
+
+.dates-step-timeline .date-row:first-child .date-copy .label {{
+  color:#7DDB91;
+}}
+
+.dates-step-timeline .date-value {{
+  margin-top:6px;
+  color:{WHITE};
+  font-size:30px;
+  line-height:1.05;
+  font-weight:950;
+  white-space:nowrap;
+}}
+
+.dates-step-timeline .meta {{
+  margin-top:5px;
+  color:rgba(255,255,255,.68);
+  font-size:11px;
+}}
+
+.dates-open-banner {{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+  margin:13px auto 0;
+  width:fit-content;
+  max-width:100%;
+  padding:11px 20px;
+  border-radius:15px;
+  background:{GOLD};
+  color:{NAVY};
+  box-shadow:0 7px 16px rgba(0,0,0,.13);
+}}
+
+.dates-open-icon {{
+  width:32px;
+  height:32px;
+  flex:none;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:{NAVY};
+  color:{GOLD};
+  font-size:17px;
+  font-weight:950;
+}}
+
+.dates-open-title {{
+  font-size:14px;
+  font-weight:950;
+  letter-spacing:.55px;
+}}
+
+.dates-open-subtitle {{
+  margin-top:2px;
+  font-size:11px;
+  font-weight:750;
+}}
+
+.dates-v3 .checklist-panel {{
+  padding:17px 21px;
+}}
+
+.dates-v3 .checklist-panel .bullet-list {{
+  margin-top:12px;
+}}
+
+@media (max-width: 900px) {{
+  .dates-hero-panel {{
+    padding:24px 27px 22px;
+  }}
+  .dates-step-timeline .date-copy {{
+    max-width:245px;
+  }}
+  .dates-step-timeline .date-value {{
+    font-size:27px;
+  }}
 }}
 
 /* SLIDE 5 — DATES + CHECKLIST */
