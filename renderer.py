@@ -1997,6 +1997,243 @@ footer {{
 .content-block.links {{ margin-top:25px; }}
 .content-block.posts {{ margin-top:22px; }}
 .content-block.dates {{ margin-top:22px; }}
+
+/* ============================================================
+   MOBILE-FIRST TYPE SCALE
+   The artwork is rendered at 1080x1350 but is primarily viewed
+   as a small Instagram image. Keep essential facts comfortably
+   readable after down-scaling.
+   ============================================================ */
+
+/* Global hierarchy */
+.top-brand-mark {{ width:40px; height:40px; font-size:13px; }}
+.top-brand-name {{ font-size:16px; }}
+.top-brand-sub {{ font-size:10px; }}
+.top-slide {{ font-size:11px; padding:8px 12px; }}
+
+.eyebrow {{
+  font-size:26px;
+  line-height:1.12;
+  padding:14px 21px;
+}}
+
+h1 {{
+  font-size:55px;
+  line-height:1.03;
+}}
+
+.sub {{
+  font-size:23px;
+  line-height:1.25;
+}}
+
+.label {{
+  font-size:12px;
+}}
+
+.value {{
+  font-size:24px;
+  line-height:1.18;
+}}
+
+.meta {{
+  font-size:15px;
+  line-height:1.28;
+}}
+
+/* Dense fallback cards: raise the floor so source facts don't
+   become microscopic. The JS fit routine handles truly dense slides. */
+.card-grid.compact .value {{ font-size:21px; }}
+.card-grid.compact .meta {{ font-size:14px; }}
+.card-grid.dense .label {{ font-size:11px; }}
+.card-grid.dense .value {{ font-size:19px; line-height:1.17; }}
+.card-grid.dense .meta {{ font-size:13px; }}
+.card-grid.ultra-dense .label {{ font-size:10px; }}
+.card-grid.ultra-dense .value {{ font-size:17px; line-height:1.15; }}
+.card-grid.ultra-dense .meta {{ font-size:12px; }}
+
+/* Slide 1 — make the application window unmistakable */
+.hero-vacancy-label {{
+  font-size:14px;
+  letter-spacing:3.2px;
+}}
+
+.hero-stat-number {{
+  font-size:116px;
+}}
+
+.hero-stat-caption {{
+  font-size:16px;
+}}
+
+.hero-date-pill {{
+  font-size:21px;
+  line-height:1.15;
+  padding:14px 19px;
+}}
+
+.hero-date-icon {{
+  width:38px;
+  height:38px;
+  font-size:16px;
+}}
+
+.hero-callout-title {{
+  font-size:12px;
+}}
+
+.hero-callout-text {{
+  font-size:13px;
+}}
+
+.hero-bottom {{
+  font-size:11px;
+}}
+
+.hero-arrow {{
+  font-size:26px;
+}}
+
+/* Slide 2 — recruitment snapshot */
+.snapshot-label {{ font-size:12px; }}
+.snapshot-value {{ font-size:27px; }}
+.snapshot-meta {{ font-size:14px; }}
+
+.snapshot-feature .snapshot-label {{ font-size:14px; }}
+.snapshot-feature .snapshot-value {{ font-size:76px; }}
+.snapshot-feature .snapshot-meta {{ font-size:15px; }}
+
+.snapshot-two .snapshot-card:first-child .snapshot-value {{ font-size:68px; }}
+.snapshot-one .snapshot-card:first-child .snapshot-value {{ font-size:82px; }}
+
+/* Slide 3 — eligibility */
+.eligibility-code {{ font-size:11px; }}
+.eligibility-value {{ font-size:21px; line-height:1.18; }}
+.eligibility-meta {{ font-size:13px; }}
+
+.eligibility-few .eligibility-value {{ font-size:30px; }}
+.eligibility-medium .eligibility-value {{ font-size:20px; }}
+.eligibility-many .eligibility-value {{ font-size:18px; }}
+.eligibility-many .eligibility-code {{ font-size:10px; }}
+
+/* Slide 4 — fees / selection / pay */
+.fee-primary-card .label {{ font-size:12px; }}
+.fee-primary-card .value {{ font-size:34px; }}
+.fee-secondary-grid .value {{ font-size:21px; }}
+
+/* Slide 5 — dates */
+.date-marker {{
+  width:32px;
+  height:32px;
+  font-size:10px;
+}}
+
+.date-row:not(:last-child):before {{
+  left:15px;
+}}
+
+.date-value {{
+  font-size:35px;
+  line-height:1.08;
+}}
+
+.date-list .label {{
+  font-size:12px;
+}}
+
+.date-list .meta {{
+  font-size:13px;
+}}
+
+.checklist-panel .bullet-list li {{
+  font-size:17px;
+  line-height:1.3;
+}}
+
+.checklist-panel .bullet-check {{
+  width:29px;
+  height:29px;
+}}
+
+/* Slide 6 — official notification */
+.official-cta-title {{
+  font-size:33px;
+}}
+
+.official-cta-url {{
+  font-size:14px;
+}}
+
+.official-cta-badge {{
+  font-size:10px;
+}}
+
+.apply-section-title {{
+  font-size:29px;
+}}
+
+.apply-section-note {{
+  font-size:12px;
+}}
+
+.apply-check-text {{
+  font-size:17px;
+  line-height:1.3;
+}}
+
+.apply-check-number {{
+  width:31px;
+  height:31px;
+  font-size:10px;
+}}
+
+/* Footer — deliberately larger because it is viewed very small
+   on phones. */
+.benefit-strip {{
+  min-height:82px;
+  padding:12px 25px;
+  border-radius:18px;
+}}
+
+.benefit-item {{
+  gap:12px;
+}}
+
+.benefit-icon {{
+  width:48px;
+  height:48px;
+  border-width:2px;
+}}
+
+.benefit-icon svg {{
+  width:28px;
+  height:28px;
+  stroke-width:2;
+}}
+
+.benefit-copy {{
+  font-size:14px;
+  line-height:1.08;
+}}
+
+.benefit-divider {{
+  height:42px;
+}}
+
+.footer-bottom {{
+  min-height:35px;
+  padding-top:9px;
+}}
+
+.footer-note {{
+  font-size:11px;
+  line-height:1.2;
+}}
+
+.footer-page {{
+  font-size:13px;
+}}
+
 </style>
 </head>
 

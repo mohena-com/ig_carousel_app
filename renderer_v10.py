@@ -369,25 +369,6 @@ def build_html(slide, total, theme="professional_white", total_vacancies=""):
             for i, x in enumerate(remaining_bullets[:3])
         )
 
-        hero_benefits = """
-          <div class="hero-benefits">
-            <div class="hero-benefit">
-              <span class="hero-benefit-icon">●</span>
-              <span><strong>Government</strong><small>Job</small></span>
-            </div>
-            <div class="hero-benefit-divider"></div>
-            <div class="hero-benefit">
-              <span class="hero-benefit-icon">↗</span>
-              <span><strong>Stable</strong><small>Career</small></span>
-            </div>
-            <div class="hero-benefit-divider"></div>
-            <div class="hero-benefit">
-              <span class="hero-benefit-icon">✓</span>
-              <span><strong>Serve</strong><small>the Society</small></span>
-            </div>
-          </div>
-        """
-
         hero = f"""
         <section class="hero">
           <div class="hero-grid"></div>
@@ -416,7 +397,6 @@ def build_html(slide, total, theme="professional_white", total_vacancies=""):
             """ if application_highlight else ""}
 
             {f'<div class="hero-info-grid">{hero_points}</div>' if hero_points else ""}
-            {hero_benefits}
           </div>
 
           <div class="hero-callout">
@@ -686,7 +666,7 @@ body:after {{
   left:24px;
   right:24px;
   top:42px;
-  bottom:86px;
+  bottom:0;
   border-radius:28px;
   background:linear-gradient(180deg, #FBFCFE 0%, {SOFT} 52%, #FBFCFE 100%);
   border:1px solid rgba(216,225,234,.55);
@@ -1894,7 +1874,7 @@ footer {{
   position:relative;
   z-index:4;
   margin-top:auto;
-  padding-top:12px;
+  padding:12px 0 8px;
 }}
 
 .benefit-strip:before {{
