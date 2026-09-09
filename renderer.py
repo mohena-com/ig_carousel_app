@@ -218,7 +218,7 @@ def _date_card_html(card, index=0):
     value = clean_text(card.get("value"))
     meta = clean_text(card.get("meta"))
     return f"""
-    <div class="date-row">
+    <div class="date-row{' correction-row' if 'correction' in label.lower() else ''}">
       <div class="date-marker">{index + 1}</div>
       <div class="date-copy">
         <div class="label">{esc(label)}</div>
@@ -841,81 +841,146 @@ def build_html(
             """
 
         elif stype == "links":
-            checklist_cards = "".join(
-                f"""
-                <div class="apply-check-card">
-                  <div class="apply-check-number">{i + 1:02d}</div>
-                  <div class="apply-check-text">{esc(x)}</div>
-                </div>
-                """
-                for i, x in enumerate(bullets)
-            )
+            # Slide 6 is a deliberate CTA/outro: make the official source,
+            # QR access and three user actions visually dominant.
+            url_cards = [
+                c for c in cards
+                if isinstance(c.get("value"), str)
+                and re.match(r"^https?://", c.get("value", "").strip())
+            ]
 
-            checklist_section = ""
-            if checklist_cards:
-                checklist_section = f"""
-                <section class="apply-section">
-                  <div class="apply-section-head">
-                    <div>
-                      <div class="section-kicker">APPLICATION CHECKLIST</div>
-                      <div class="apply-section-title">Before You Apply</div>
+            qr_blocks = []
+            qr_labels = [
+                ("SCAN TO APPLY", "APPLICATION FORM"),
+                ("SCAN FOR PDF", "RECRUITMENT NOTIFICATION"),
+            ]
+            for i, card in enumerate(url_cards[:2]):
+                label1, label2 = qr_labels[min(i, len(qr_labels) - 1)]
+                qr_blocks.append(
+                    f"""
+                    <div class="outro-qr-card">
+                      <div class="outro-qr-label">
+                        <strong>{esc(label1)}</strong>
+                        <span>{esc(label2)}</span>
+                      </div>
+                      <div class="outro-qr-box">
+                        {_link_card_html(card)}
+                      </div>
                     </div>
-                    <div class="apply-section-note">Read • Prepare • Review</div>
-                  </div>
-                  <div class="apply-check-grid">{checklist_cards}</div>
-                </section>
-                """
+                    """
+                )
 
-            first_url = (
-                clean_text(url_cards[0].get("value"))
-                if url_cards else ""
-            )
+            qr_html = "".join(qr_blocks)
+            first_url = clean_text(url_cards[0].get("value")) if url_cards else ""
+
+            action_defaults = [
+                ("SAVE THIS POST", "Save this post so you don't miss the application deadline.", "calendar"),
+                ("SHARE WITH FRIENDS", "Share this recruitment update with friends looking for a Government Job.", "share"),
+                ("TAP LINK IN BIO", "Use the link in our bio to continue to the application page.", "link"),
+            ]
+
+            checklist_cards = []
+            for i, x in enumerate(bullets[:3]):
+                title, fallback_text, icon_name = action_defaults[i]
+                raw = clean_text(x)
+                # Keep the source bullet when it contains useful content;
+                # otherwise use the standard CTA wording.
+                step_text = raw or fallback_text
+                checklist_cards.append(
+                    f"""
+                    <div class="outro-action-card {'outro-action-primary' if i == 2 else ''}">
+                      <div class="outro-action-top">
+                        <div class="outro-action-number">{i+1:02d}</div>
+                        <div class="outro-action-copy">
+                          <div class="outro-action-title">{esc(title)}</div>
+                          <div class="outro-action-text">{esc(step_text)}</div>
+                        </div>
+                      </div>
+                      <div class="outro-action-art outro-art-{icon_name}" aria-hidden="true">
+                        <svg viewBox="0 0 72 58">
+                          {(
+                            '<rect x="14" y="7" width="34" height="42" rx="5"></rect>'
+                            '<line x1="21" y1="14" x2="41" y2="14"></line>'
+                            '<circle cx="31" cy="42" r="2"></circle>'
+                            '<circle cx="51" cy="39" r="12"></circle>'
+                            '<line x1="51" y1="32" x2="51" y2="39"></line>'
+                            '<line x1="51" y1="39" x2="56" y2="42"></line>'
+                          ) if icon_name == "calendar" else (
+                            '<path d="M13 30c8-5 14-10 21-10 6 0 9 5 13 5 4 0 8-4 12-9"></path>'
+                            '<path d="M47 12h12v12"></path>'
+                            '<path d="M19 38c4 7 12 10 18 5l8-8"></path>'
+                            '<path d="M25 23l-8 8 7 7 8-8"></path>'
+                          ) if icon_name == "share" else (
+                            '<rect x="22" y="5" width="28" height="48" rx="5"></rect>'
+                            '<circle cx="36" cy="47" r="2"></circle>'
+                            '<path d="M29 31l5-5 4 4 8-10"></path>'
+                            '<path d="M42 20h4v4"></path>'
+                          )}
+                        </svg>
+                      </div>
+                    </div>
+                    """
+                )
+
+            # If the source contains fewer than three bullets, fill the visual
+            # CTA row with the standard actions rather than leaving it sparse.
+            while len(checklist_cards) < 3:
+                i = len(checklist_cards)
+                title, fallback_text, icon_name = action_defaults[i]
+                checklist_cards.append(
+                    f"""
+                    <div class="outro-action-card {'outro-action-primary' if i == 2 else ''}">
+                      <div class="outro-action-top">
+                        <div class="outro-action-number">{i+1:02d}</div>
+                        <div class="outro-action-copy">
+                          <div class="outro-action-title">{esc(title)}</div>
+                          <div class="outro-action-text">{esc(fallback_text)}</div>
+                        </div>
+                      </div>
+                      <div class="outro-action-art outro-art-{icon_name}" aria-hidden="true">
+                        <svg viewBox="0 0 72 58">
+                          {(
+                            '<rect x="14" y="7" width="34" height="42" rx="5"></rect><line x1="21" y1="14" x2="41" y2="14"></line><circle cx="31" cy="42" r="2"></circle><circle cx="51" cy="39" r="12"></circle><line x1="51" y1="32" x2="51" y2="39"></line><line x1="51" y1="39" x2="56" y2="42"></line>'
+                          ) if icon_name == "calendar" else (
+                            '<path d="M13 30c8-5 14-10 21-10 6 0 9 5 13 5 4 0 8-4 12-9"></path><path d="M47 12h12v12"></path><path d="M19 38c4 7 12 10 18 5l8-8"></path>'
+                          ) if icon_name == "share" else (
+                            '<rect x="22" y="5" width="28" height="48" rx="5"></rect><circle cx="36" cy="47" r="2"></circle><path d="M29 31l5-5 4 4 8-10"></path>'
+                          )}
+                        </svg>
+                      </div>
+                    </div>
+                    """
+                )
 
             body = f"""
-            <div class="links-v3">
-              <section class="official-cta">
-                <div class="official-cta-copy">
-                  <div class="section-kicker">OFFICIAL NOTIFICATION</div>
-                  <div class="official-cta-title">
-                    Scan the QR code to open the official recruitment notification
+            <div class="outro-v4">
+              <section class="outro-official">
+                <div class="outro-official-copy">
+                  <div class="outro-kicker">OFFICIAL APPLICATION ACCESS</div>
+                  <div class="outro-official-title">
+                    Scan to open the official<br>recruitment application
                   </div>
-                  <div class="official-cta-url">{esc(first_url)}</div>
-                  <div class="official-cta-badge">
-                    VERIFY DETAILS BEFORE APPLYING
-                  </div>
+                  <div class="outro-official-url">{esc(first_url)}</div>
+                  <div class="outro-verify">VERIFY DETAILS BEFORE APPLYING</div>
                 </div>
-                <div class="official-cta-qr">
-                  {cards_html}
+
+                <div class="outro-qr-stack">
+                  {qr_html}
                 </div>
               </section>
-                             <section class="cta-steps">
-                 <div class="section-kicker">DON'T MISS THE DEADLINE</div>
-                 <div class="cta-step-grid">
-                   <div class="cta-step">
-                     <div class="cta-step-icon">01</div>
-                     <div>
-                       <div class="cta-step-title">SAVE THIS POST</div>
-                       <div class="cta-step-text">Save this post so you don't miss the application deadline.</div>
-                     </div>
-                   </div>
-                   <div class="cta-step">
-                     <div class="cta-step-icon">02</div>
-                     <div>
-                       <div class="cta-step-title">SHARE WITH FRIENDS</div>
-                       <div class="cta-step-text">Share this recruitment update with friends looking for a Government Job.</div>
-                     </div>
-                   </div>
-                   <div class="cta-step cta-step-primary">
-                     <div class="cta-step-icon">03</div>
-                     <div>
-                       <div class="cta-step-title">TAP LINK IN BIO</div>
-                       <div class="cta-step-text">Use the link in our bio to continue to the application page.</div>
-                     </div>
-                   </div>
-                 </div>
-               </section>
+
+              <section class="outro-actions">
+                <div class="outro-actions-head">
+                  <div class="outro-actions-kicker">DON'T MISS THE DEADLINE</div>
+                  <div class="outro-actions-title">3 things to do before you leave</div>
+                </div>
+                <div class="outro-action-grid">
+                  {''.join(checklist_cards)}
+                </div>
+              </section>
             </div>
             """
+
 
         else:
             body = f'<div class="card-grid {density}">{cards_html}</div>'
@@ -1937,6 +2002,24 @@ h1 {{
   color:#7DDB91;
 }}
 
+/* Long correction / revised-date entries stay inside their tablet. */
+.dates-step-timeline .correction-row .date-copy {{
+  padding:13px 18px;
+}}
+
+.dates-step-timeline .correction-row .date-value {{
+  font-size:22px;
+  line-height:1.12;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  text-wrap:balance;
+}}
+
+.dates-step-timeline .correction-row .date-marker {{
+  border-color:{GOLD};
+}}
+
+
 .dates-step-timeline .date-value {{
   margin-top:6px;
   color:{WHITE};
@@ -2283,6 +2366,293 @@ h1 {{
 }}
 
 /* SLIDE 6 — OFFICIAL LINKS + CHECKLIST */
+
+/* SLIDE 6 — OUTRO V4 / SAMPLE-INSPIRED CTA */
+.outro-v4 {{
+  display:flex;
+  flex-direction:column;
+  gap:17px;
+}}
+
+.outro-official {{
+  position:relative;
+  min-height:276px;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 330px;
+  gap:22px;
+  align-items:center;
+  background:{NAVY};
+  border-radius:24px;
+  padding:28px 30px 27px;
+  overflow:hidden;
+  box-shadow:0 15px 32px rgba(11,46,89,.16);
+}}
+
+.outro-official:before {{
+  content:"";
+  position:absolute;
+  width:360px;
+  height:360px;
+  right:-175px;
+  top:-155px;
+  border:31px solid rgba(255,255,255,.065);
+  border-radius:50%;
+}}
+
+.outro-official:after {{
+  content:"";
+  position:absolute;
+  width:245px;
+  height:245px;
+  left:-105px;
+  bottom:-160px;
+  border:23px solid rgba(228,165,28,.09);
+  border-radius:50%;
+}}
+
+.outro-official-copy,
+.outro-qr-stack {{
+  position:relative;
+  z-index:2;
+}}
+
+.outro-kicker {{
+  color:{GOLD};
+  font-size:12px;
+  font-weight:950;
+  letter-spacing:1px;
+  text-transform:uppercase;
+}}
+
+.outro-official-title {{
+  margin-top:12px;
+  color:{WHITE};
+  font-size:29px;
+  line-height:1.08;
+  font-weight:950;
+  letter-spacing:-.5px;
+}}
+
+.outro-official-url {{
+  margin-top:13px;
+  max-width:540px;
+  color:#BCD7EA;
+  font-size:11px;
+  line-height:1.3;
+  overflow-wrap:anywhere;
+}}
+
+.outro-verify {{
+  display:inline-flex;
+  margin-top:14px;
+  padding:8px 13px;
+  border-radius:999px;
+  background:{GOLD};
+  color:{NAVY};
+  font-size:10px;
+  font-weight:950;
+  letter-spacing:.65px;
+}}
+
+.outro-qr-stack {{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  justify-content:center;
+  gap:12px;
+}}
+
+.outro-qr-card {{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:11px;
+  width:100%;
+}}
+
+.outro-qr-label {{
+  width:105px;
+  color:{WHITE};
+  text-align:right;
+  font-size:10px;
+  line-height:1.12;
+  text-transform:uppercase;
+}}
+
+.outro-qr-label strong {{
+  display:block;
+  color:{GOLD};
+  font-size:12px;
+  letter-spacing:.5px;
+}}
+
+.outro-qr-label span {{
+  display:block;
+  margin-top:3px;
+  color:{WHITE};
+  font-size:9px;
+  font-weight:800;
+}}
+
+.outro-qr-box {{
+  width:132px;
+  height:132px;
+  flex:none;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:8px;
+  border:2px solid {GOLD};
+  border-radius:16px;
+  background:{WHITE};
+  box-shadow:0 7px 16px rgba(0,0,0,.18);
+}}
+
+.outro-qr-box .link-card {{
+  display:block;
+  width:100%;
+  margin:0;
+  padding:0;
+  border:0;
+  background:{WHITE};
+  box-shadow:none;
+}}
+
+.outro-qr-box .link-copy {{
+  display:none;
+}}
+
+.outro-qr-box .qr-wrap {{
+  padding:0;
+  border:0;
+  background:{WHITE};
+}}
+
+.outro-qr-box .qr-wrap img {{
+  display:block;
+  width:112px;
+  height:112px;
+}}
+
+.outro-actions {{
+  padding:17px 20px 19px;
+  border:1px solid {LINE};
+  border-radius:21px;
+  background:{SOFT};
+  box-shadow:0 8px 22px rgba(11,46,89,.045);
+}}
+
+.outro-actions-head {{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  gap:18px;
+  padding:0 3px 11px;
+}}
+
+.outro-actions-kicker {{
+  color:{NAVY};
+  font-size:13px;
+  font-weight:950;
+  letter-spacing:.65px;
+  text-transform:uppercase;
+}}
+
+.outro-actions-title {{
+  color:{MUTED};
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.35px;
+}}
+
+.outro-action-grid {{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:11px;
+}}
+
+.outro-action-card {{
+  min-height:154px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  overflow:hidden;
+  border:1px solid {LINE};
+  border-radius:16px;
+  background:{WHITE};
+}}
+
+.outro-action-primary {{
+  border:1.5px solid {GOLD};
+}}
+
+.outro-action-top {{
+  display:flex;
+  gap:11px;
+  padding:13px 13px 8px;
+}}
+
+.outro-action-number {{
+  width:31px;
+  height:31px;
+  flex:none;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:50%;
+  background:{NAVY};
+  color:{GOLD};
+  font-size:10px;
+  font-weight:950;
+}}
+
+.outro-action-title {{
+  color:{NAVY};
+  font-size:13px;
+  line-height:1.05;
+  font-weight:950;
+  letter-spacing:.35px;
+}}
+
+.outro-action-text {{
+  margin-top:5px;
+  color:{INK};
+  font-size:11px;
+  line-height:1.23;
+  font-weight:700;
+}}
+
+.outro-action-art {{
+  height:66px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:{SOFT};
+  border-top:1px solid {LINE};
+}}
+
+.outro-action-art svg {{
+  width:64px;
+  height:52px;
+  fill:none;
+  stroke:{NAVY};
+  stroke-width:2.1;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}}
+
+.outro-art-calendar svg {{
+  stroke:{NAVY};
+}}
+
+.outro-art-share svg {{
+  stroke:{NAVY};
+}}
+
+.outro-art-link svg {{
+  stroke:{NAVY};
+}}
+
 .links-v3 {{
   display:flex;
   flex-direction:column;
@@ -3595,6 +3965,31 @@ h1 {{
   hyphens:auto;
 }}
 
+
+@media (max-width: 900px) {{
+  .outro-official {{
+    grid-template-columns:minmax(0,1fr) 285px;
+    gap:14px;
+    padding:24px 25px;
+  }}
+  .outro-official-title {{
+    font-size:26px;
+  }}
+  .outro-qr-box {{
+    width:116px;
+    height:116px;
+  }}
+  .outro-qr-box .qr-wrap img {{
+    width:98px;
+    height:98px;
+  }}
+  .outro-qr-label {{
+    width:90px;
+  }}
+  .outro-action-text {{
+    font-size:10px;
+  }}
+}}
 </style>
 </head>
 
