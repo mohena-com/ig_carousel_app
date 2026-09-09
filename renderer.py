@@ -750,10 +750,14 @@ def build_html(
 
         elif stype == "dates":
             body = f"""
-            <div class="dates-composition">
-              <section class="dates-panel">
+            <div class="dates-v2">
+              <section class="dates-timeline-card">
                 <div class="section-kicker">APPLICATION SCHEDULE</div>
-                <div class="date-list">{cards_html}</div>
+                <div class="dates-timeline">{cards_html}</div>
+                <div class="dates-status">
+                  <span class="status-dot"></span>
+                  <strong>APPLICATIONS OPEN NOW!</strong>
+                </div>
               </section>
               {_checklist_panel_html(bullets, "BEFORE YOU SUBMIT")}
             </div>
@@ -807,7 +811,32 @@ def build_html(
                   {cards_html}
                 </div>
               </section>
-              {checklist_section}
+                             <section class="cta-steps">
+                 <div class="section-kicker">DON'T MISS THE DEADLINE</div>
+                 <div class="cta-step-grid">
+                   <div class="cta-step">
+                     <div class="cta-step-icon">01</div>
+                     <div>
+                       <div class="cta-step-title">SAVE THIS POST</div>
+                       <div class="cta-step-text">Save this post so you don't miss the application deadline.</div>
+                     </div>
+                   </div>
+                   <div class="cta-step">
+                     <div class="cta-step-icon">02</div>
+                     <div>
+                       <div class="cta-step-title">SHARE WITH FRIENDS</div>
+                       <div class="cta-step-text">Share this recruitment update with friends looking for a Government Job.</div>
+                     </div>
+                   </div>
+                   <div class="cta-step cta-step-primary">
+                     <div class="cta-step-icon">03</div>
+                     <div>
+                       <div class="cta-step-title">TAP LINK IN BIO</div>
+                       <div class="cta-step-text">Use the link in our bio to continue to the application page.</div>
+                     </div>
+                   </div>
+                 </div>
+               </section>
             </div>
             """
 
@@ -1546,6 +1575,162 @@ h1 {{
 }}
 
 /* SLIDE 5 — DATES + CHECKLIST */
+.dates-v2 {{
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+}}
+.dates-timeline-card {{
+  border:1px solid {LINE};
+  border-radius:22px;
+  background:{SOFT};
+  padding:28px 34px 25px;
+  box-shadow:0 8px 22px rgba(11,46,89,.06);
+}}
+.dates-timeline-card > .section-kicker {{ text-align:center; }}
+.dates-timeline {{
+  position:relative;
+  width:640px;
+  max-width:100%;
+  margin:22px auto 0;
+}}
+.dates-timeline:before {{
+  content:"";
+  position:absolute;
+  left:50%;
+  top:27px;
+  bottom:27px;
+  width:4px;
+  transform:translateX(-50%);
+  background:linear-gradient({BLUE} 0 50%, {GOLD} 50% 100%);
+  border-radius:4px;
+}}
+.dates-timeline .date-row {{
+  position:relative;
+  display:grid;
+  grid-template-columns:1fr 58px 1fr;
+  align-items:center;
+  min-height:105px;
+}}
+.dates-timeline .date-marker {{
+  grid-column:2;
+  grid-row:1;
+  justify-self:center;
+  width:48px;
+  height:48px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:{WHITE};
+  border:4px solid {BLUE};
+  color:{BLUE};
+  font-size:13px;
+  font-weight:950;
+  z-index:2;
+}}
+.dates-timeline .date-row:nth-child(2) .date-marker {{
+  border-color:{GOLD};
+  color:{NAVY};
+}}
+.dates-timeline .date-copy {{
+  grid-column:3;
+  grid-row:1;
+  padding-left:20px;
+  text-align:left;
+}}
+.dates-timeline .date-row:nth-child(odd) .date-copy {{
+  grid-column:1;
+  padding-left:0;
+  padding-right:20px;
+  text-align:right;
+}}
+.dates-timeline .date-copy .label {{
+  color:{BLUE};
+  font-size:13px;
+  font-weight:950;
+  letter-spacing:.8px;
+  text-transform:uppercase;
+}}
+.dates-timeline .date-row:nth-child(2) .date-copy .label {{ color:#C58A00; }}
+.dates-timeline .date-value {{
+  margin-top:5px;
+  color:{NAVY};
+  font-size:30px;
+  line-height:1.05;
+  font-weight:950;
+}}
+.dates-status {{
+  margin:18px auto 0;
+  width:max-content;
+  max-width:100%;
+  display:flex;
+  align-items:center;
+  gap:9px;
+  padding:10px 18px;
+  border-radius:999px;
+  background:{NAVY};
+  color:{WHITE};
+  font-size:14px;
+  letter-spacing:.6px;
+}}
+.status-dot {{
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  background:#43B97F;
+  box-shadow:0 0 0 4px rgba(67,185,127,.16);
+}}
+.cta-steps {{
+  margin-top:20px;
+  padding:22px 24px 24px;
+  border-radius:20px;
+  background:{SOFT};
+  border:1px solid {LINE};
+}}
+.cta-step-grid {{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+}}
+.cta-step {{
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+  padding:16px;
+  min-height:90px;
+  border:1px solid {LINE};
+  border-radius:15px;
+  background:{WHITE};
+}}
+.cta-step-primary {{ border:1.5px solid {GOLD}; }}
+.cta-step-icon {{
+  width:38px;
+  height:38px;
+  flex:none;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:{NAVY};
+  color:{GOLD};
+  font-size:11px;
+  font-weight:950;
+}}
+.cta-step-title {{
+  color:{NAVY};
+  font-size:13px;
+  font-weight:950;
+  letter-spacing:.65px;
+}}
+.cta-step-text {{
+  margin-top:6px;
+  color:{INK};
+  font-size:13px;
+  line-height:1.25;
+  font-weight:700;
+}}
+
 .dates-composition {{
   display:grid;
   grid-template-columns:1.05fr 1fr;
