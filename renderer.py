@@ -291,6 +291,19 @@ def _extract_application_dates(text):
     return (dates[0], dates[1]) if len(dates) >= 2 else ("", "")
 
 
+def _hook_highlight(subtitle):
+    """Create a concise recruitment highlight from the source subtitle."""
+    s = clean_text(subtitle)
+    if not s:
+        return "Government Recruitment"
+    s = re.sub(r"\b(?:recruitment|online form|main online form)\b.*$", "", s, flags=re.I)
+    s = re.sub(r"\b(?:20\d{2}|20\d{2}-\d{2})\b", "", s)
+    s = re.sub(r"\s+", " ", s).strip(" -–—,|")
+    s = re.sub(r"\bnon[\s-]+teaching\s+post\b", "Non-Teaching Posts", s, flags=re.I)
+    s = re.sub(r"\bnon[\s-]+teaching\s+posts?\b", "Non-Teaching Posts", s, flags=re.I)
+    return s or clean_text(subtitle) or "Government Recruitment"
+
+
 def _extract_application_highlight(bullets):
     """Use the supplied application/date bullet without inventing dates."""
     for bullet in bullets:
@@ -584,26 +597,9 @@ def build_html(
 
     hero = ""
     if stype == "hook":
-        # Slide 1 gets the authoritative total from the complete deck.
+        # Slide 1 is deliberately a cover: only the highest-value facts remain.
         metric = clean_text(total_vacancies)
-
-        application_highlight = _extract_application_highlight(bullets)
-        application_start, application_end = _extract_application_dates(application_highlight)
-
-        remaining_bullets = [
-            b for b in bullets
-            if clean_text(b) != clean_text(application_highlight)
-        ]
-
-        hero_points = "".join(
-            f"""
-            <div class="hero-info-card">
-              <div class="hero-info-icon">{'✓' if i == 0 else '•'}</div>
-              <div class="hero-info-text">{esc(x)}</div>
-            </div>
-            """
-            for i, x in enumerate(remaining_bullets[:3])
-        )
+        highlight = _hook_highlight(subtitle)
 
         hero = f"""
         <section class="hero">
@@ -614,59 +610,48 @@ def build_html(
             {f'<span class="hero-count">TOTAL VACANCIES</span>' if metric else ""}
           </div>
 
-          <div class="hero-main">
+          <div class="hero-main hero-cover-main">
+            <div class="hero-highlight-badge">
+              {esc(highlight)}
+            </div>
+
             {f"""
-            <div class="hero-vacancy-block">
+            <div class="hero-vacancy-focus">
               <div class="hero-vacancy-label">TOTAL VACANCIES</div>
-              <div class="hero-vacancy-row">
+              <div class="hero-vacancy-focus-row">
                 <div class="hero-stat-number">{esc(metric)}</div>
-                <div class="hero-stat-caption">OPEN<br>POSITIONS</div>
+                <div class="hero-stat-caption">VACANCIES</div>
               </div>
             </div>
             """ if metric else ""}
 
             {f"""
-            <div class="hero-application-row">
-              <div class="hero-date-tablet">
-                <div class="hero-date-item">
-                  <div class="hero-date-label">APPLICATION START</div>
-                  <div class="hero-date-value">{esc(application_start or application_highlight)}</div>
-                </div>
-                <div class="hero-date-arrow">↓</div>
-                <div class="hero-date-item">
-                  <div class="hero-date-label">APPLICATION END</div>
-                  <div class="hero-date-value">{esc(application_end or "—")}</div>
-                </div>
+            <div class="hero-date-tablet hero-date-tablet-cover">
+              <div class="hero-date-item">
+                <div class="hero-date-label">APPLICATION START</div>
+                <div class="hero-date-value">{esc(application_start or application_highlight)}</div>
               </div>
-              {(
-                '<div class="hero-qr-card">'
-                '<div class="hero-qr-copy">'
-                '<div class="hero-qr-label">APPLY ONLINE</div>'
-                '<div class="hero-qr-title">Scan to open the<br>application form</div>'
-                f'<div class="hero-qr-url">{esc(application_url)}</div>'
-                '</div>'
-                f'<img class="hero-qr-image" src="{qr_data_uri(application_url)}" alt="Application QR code">'
-                '</div>'
-              ) if application_url else ""}
+              <div class="hero-date-arrow">↓</div>
+              <div class="hero-date-item">
+                <div class="hero-date-label">APPLICATION END</div>
+                <div class="hero-date-value">{esc(application_end or "—")}</div>
+              </div>
             </div>
             """ if application_highlight else ""}
 
-          </div>
-
-          <div class="hero-callout">
-            <div class="hero-callout-icon">→</div>
-            <div>
-              <div class="hero-callout-title">YOUR APPLICATION STARTS HERE</div>
-              <div class="hero-callout-text">Check the following slides for post-wise details, eligibility, dates and application information.</div>
+            <div class="hero-cover-message">
+              <strong>Swipe to explore</strong>
+              <span>Posts • Eligibility • Dates • Application</span>
             </div>
           </div>
 
           <div class="hero-bottom">
             <span>SWIPE FOR POSTS • ELIGIBILITY • DATES • APPLICATION</span>
-            <span class="hero-arrow">→</span>
+            <span class="hero-arrow">SWIPE →</span>
           </div>
         </section>
         """
+
 
     content = ""
     if stype != "hook":
@@ -2436,6 +2421,76 @@ h1 {{
 .card-grid.ultra-dense .value {{ font-size:17px; line-height:1.15; }}
 .card-grid.ultra-dense .meta {{ font-size:12px; }}
 
+/* Slide 1 — cover / hook */
+.hero-cover-main {{
+  margin-top:24px;
+}}
+
+.hero-highlight-badge {{
+  display:inline-flex;
+  align-items:center;
+  max-width:860px;
+  padding:12px 18px;
+  border-radius:12px;
+  background:{GOLD};
+  color:{NAVY};
+  font-size:23px;
+  line-height:1.12;
+  font-weight:950;
+  letter-spacing:.1px;
+  box-shadow:0 7px 18px rgba(228,165,28,.18);
+}}
+
+.hero-vacancy-focus {{
+  margin-top:30px;
+}}
+
+.hero-vacancy-focus-row {{
+  display:flex;
+  align-items:flex-end;
+  gap:20px;
+}}
+
+.hero-vacancy-focus .hero-stat-number {{
+  color:{WHITE};
+  font-size:126px;
+  line-height:.82;
+  font-weight:950;
+  letter-spacing:-6px;
+}}
+
+.hero-vacancy-focus .hero-stat-caption {{
+  color:{GOLD};
+  font-size:22px;
+  line-height:1;
+  font-weight:950;
+  letter-spacing:1.5px;
+  padding-bottom:8px;
+}}
+
+.hero-cover-message {{
+  margin-top:34px;
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+  color:{WHITE};
+}}
+
+.hero-cover-message strong {{
+  color:{GOLD};
+  font-size:20px;
+  line-height:1.1;
+  font-weight:950;
+  letter-spacing:.3px;
+}}
+
+.hero-cover-message span {{
+  color:#D7E5F0;
+  font-size:17px;
+  line-height:1.2;
+  font-weight:700;
+}}
+
 /* Slide 1 — make the application window unmistakable */
 .hero-vacancy-label {{
   font-size:14px;
@@ -2497,6 +2552,70 @@ h1 {{
 .hero-qr-image {{
   width:132px;
   height:132px;
+}}
+
+/* Slide 1 — retain the vertical application-date tablet */
+.hero-date-tablet-cover {{
+  width:360px;
+  min-height:150px;
+  margin-top:28px;
+  padding:16px 20px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  border:1px solid rgba(255,255,255,.28);
+  border-radius:16px;
+  background:rgba(255,255,255,.075);
+  box-sizing:border-box;
+}}
+
+.hero-date-tablet-cover .hero-date-item {{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  gap:18px;
+}}
+
+.hero-date-tablet-cover .hero-date-label {{
+  color:{GOLD};
+  font-size:12px;
+  font-weight:950;
+  letter-spacing:1px;
+}}
+
+.hero-date-tablet-cover .hero-date-value {{
+  color:{WHITE};
+  font-size:23px;
+  line-height:1.05;
+  font-weight:900;
+  white-space:nowrap;
+}}
+
+.hero-date-tablet-cover .hero-date-arrow {{
+  color:{GOLD};
+  font-size:22px;
+  line-height:1;
+  margin:3px 0;
+  padding-left:2px;
+}}
+
+/* Final Slide 1 cover sizing */
+.hero-cover-main .hero-vacancy-label {{
+  font-size:14px;
+  letter-spacing:3px;
+  margin-bottom:14px;
+}}
+
+.hero-cover-main .hero-stat-number {{
+  font-size:126px;
+}}
+
+.hero-cover-main .hero-stat-caption {{
+  font-size:22px;
+}}
+
+.hero-bottom .hero-arrow {{
+  font-size:23px;
 }}
 
 /* Slide 2 — recruitment snapshot */
