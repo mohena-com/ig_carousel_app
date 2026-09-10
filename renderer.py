@@ -4114,7 +4114,7 @@ h1 {{
 
   <div class="topbar">
     <div class="top-brand">
-      <div class="top-brand-mark">SD</div>
+      {brand_markup}
       <div class="top-brand-copy">
         <div class="top-brand-name">SHAKTIDOOTAM</div>
         <div class="top-brand-sub">Government Job Updates</div>
