@@ -681,7 +681,7 @@ def build_html(
     brand_markup = (
         f'<img class="top-brand-logo" src="{esc(logo_url)}" alt="{esc(eyebrow)} logo" />'
         if logo_url
-        else '<div class="top-brand-mark">SD</div>'
+        else '<div class="top-brand-mark" aria-hidden="true"></div>'
     )
     bullets = [
         clean_text(x)
@@ -1227,6 +1227,17 @@ body:after {{
   z-index:3;
 }}
 
+.page-tag {{
+  position:absolute;
+  left:58px;
+  bottom:22px;
+  z-index:3;
+  color:{NAVY};
+  font-size:13px;
+  font-weight:950;
+  letter-spacing:.2px;
+}}
+
 .top-brand {{
   display:flex;
   align-items:stretch;
@@ -1264,13 +1275,7 @@ body:after {{
   height:34px;
   border-radius:9px;
   background:{NAVY};
-  color:{WHITE};
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:11px;
-  font-weight:950;
-  letter-spacing:.2px;
+  display:block;
 }}
 
 .top-brand-logo {{
@@ -4215,6 +4220,8 @@ h1 {{
       </div>
     </div>
   </div>
+
+  <div class="page-tag">@shaktidootam</div>
 
   <h1 class="{'hook-title' if stype == 'hook' else ''}">{esc(title)}</h1>
   {f'<div class="sub{' hook-subtitle' if stype == 'hook' else ''}">{esc(subtitle)}</div>' if subtitle else ""}
