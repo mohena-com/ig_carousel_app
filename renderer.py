@@ -1255,7 +1255,8 @@ body:after {{
   min-height:62px;
   min-width:240px;
   padding:0 18px 0 16px;
-  background:linear-gradient(180deg, rgba(255,255,255,.96) 0%, rgba(245,248,251,.96) 100%);
+  background:linear-gradient(135deg, #123b66 0%, #0b2e59 100%);
+  border-color:rgba(11,46,89,.18);
 }}
 
 .top-brand-mark {{
@@ -1290,11 +1291,12 @@ body:after {{
 }}
 
 .top-brand-name {{
-  color:{NAVY};
-  font-size:16px;
+  color:{WHITE};
+  font-size:20px;
   line-height:1.05;
   font-weight:950;
   letter-spacing:.75px;
+  text-transform:uppercase;
 }}
 
 .top-brand-sub {{
@@ -3576,7 +3578,7 @@ footer {{
 
 /* Global hierarchy */
 .top-brand-mark {{ width:40px; height:40px; font-size:13px; }}
-.top-brand-name {{ font-size:16px; }}
+.top-brand-name {{ font-size:18px; }}
 .top-brand-sub {{ font-size:10px; }}
 .top-slide {{ font-size:11px; padding:8px 12px; }}
 
