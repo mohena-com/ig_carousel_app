@@ -266,10 +266,17 @@ def _normalise_type(stype):
 
 def _extract_vacancy_total(deck):
     """
-    Find the most explicit total-vacancy value anywhere in the deck.
-    This lets Slide 1 show the same authoritative total used elsewhere,
-    even when Slide 1 itself has no vacancy card.
+    Prefer the explicit deck-level total_vacancies field when it exists.
+    If that field is missing, fall back to scanning slide cards for a
+    vacancy value and strip out any textual label so only the number remains.
     """
+    if isinstance(deck, dict):
+        direct = deck.get("total_vacancies")
+        if direct not in (None, ""):
+            direct_text = clean_text(str(direct))
+            if re.search(r"\d", direct_text):
+                return direct_text
+
     candidates = []
 
     for slide in (deck.get("slides") or []):
@@ -299,9 +306,16 @@ def _extract_vacancy_total(deck):
             label = clean_text(card.get("label")).lower()
             value = clean_text(card.get("value"))
             if value and "total vacancies" in label:
-                return value
+                match = re.search(r"(\d[\d,]*)", value)
+                if match:
+                    return match.group(1)
 
-    return candidates[0] if candidates else ""
+    for value in candidates:
+        match = re.search(r"(\d[\d,]*)", value)
+        if match:
+            return match.group(1)
+
+    return ""
 
 
 def _extract_application_url(deck):

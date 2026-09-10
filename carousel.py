@@ -127,4 +127,9 @@ def make_deck(f: JobFacts):
     link_cards=[c(x.label,x.url) for x in f.links]
     if f.source_url: link_cards.append(c("Source page",f.source_url))
     slides.append(IGSlide(slide_number=6,slide_type="links",title="Official Links & How to Apply",eyebrow=org,cards=link_cards,bullets=usable_steps[:4],footer_note="Scan the QR code to open an official link. Check the notification before applying."))
-    return {"topic":name,"organisation":org,"slides":[s.model_dump() for s in slides]}
+    return {
+        "topic": name,
+        "organisation": org,
+        "total_vacancies": total,
+        "slides": [s.model_dump() for s in slides],
+    }
