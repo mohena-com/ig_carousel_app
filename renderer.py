@@ -1160,6 +1160,7 @@ def build_html(
         </div>
 
         <div class="footer-bottom">
+          <div class="page-tag">@shaktidootam</div>
           <div class="footer-note">{esc(note)}</div>
           <div class="footer-page">{int(number):02d}/{int(total):02d}</div>
         </div>
@@ -1225,17 +1226,6 @@ body:after {{
   justify-content:space-between;
   position:relative;
   z-index:3;
-}}
-
-.page-tag {{
-  position:absolute;
-  left:58px;
-  bottom:22px;
-  z-index:3;
-  color:{NAVY};
-  font-size:13px;
-  font-weight:950;
-  letter-spacing:.2px;
 }}
 
 .top-brand {{
@@ -3548,10 +3538,19 @@ footer {{
 .footer-bottom {{
   min-height:31px;
   display:grid;
-  grid-template-columns:minmax(0,1fr) 50px;
+  grid-template-columns:120px minmax(0,1fr) 50px;
   gap:12px;
   align-items:center;
   padding-top:8px;
+}}
+
+.page-tag {{
+  color:{NAVY};
+  font-size:13px;
+  font-weight:950;
+  letter-spacing:.2px;
+  text-align:left;
+  white-space:nowrap;
 }}
 
 .footer-note {{
@@ -4221,8 +4220,6 @@ h1 {{
     </div>
   </div>
 
-  <div class="page-tag">@shaktidootam</div>
-
   <h1 class="{'hook-title' if stype == 'hook' else ''}">{esc(title)}</h1>
   {f'<div class="sub{' hook-subtitle' if stype == 'hook' else ''}">{esc(subtitle)}</div>' if subtitle else ""}
   <div class="rule"></div>
@@ -4339,7 +4336,7 @@ async def render(deck, out):
                     total_vacancies=vacancy_total,
                     organisation=organisation,
                     application_url=application_url,
-                    logo_url=logo_url if _normalise_type(s.get("slide_type")) == "hook" else "",
+                    logo_url=logo_url,
                 ),
                 wait_until="load",
             )
