@@ -1322,6 +1322,12 @@ body:after {{
   margin-top:10px;
 }}
 
+.org-brand-wrap {{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}}
+
 .eyebrow {{
   position:relative;
   z-index:2;
@@ -4207,7 +4213,12 @@ h1 {{
   </div>
 
   <div class="org-row{' hook-org-row' if stype == 'hook' else ''}">
-    <div class="eyebrow{' hook-eyebrow' if stype == 'hook' else ''}">{esc(eyebrow)}</div>
+    <div class="org-brand-wrap">
+      <div class="top-brand-card top-brand-logo-card">
+        {brand_markup}
+      </div>
+      <div class="eyebrow{' hook-eyebrow' if stype == 'hook' else ''}">{esc(eyebrow)}</div>
+    </div>
   </div>
 
   <h1 class="{'hook-title' if stype == 'hook' else ''}">{esc(title)}</h1>
