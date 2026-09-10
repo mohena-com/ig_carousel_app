@@ -3502,14 +3502,16 @@ h1 {{
 .hero-stat-number-wrap {{
   display:flex;
   align-items:center;
-  padding:0;
-  border:none;
-  border-radius:0;
-  background:none;
-  box-shadow:none;
+  padding:5px 15px 7px;
+  border:3px solid rgba(228,165,28,.82);
+  border-radius:18px;
+  background:linear-gradient(145deg, rgba(255,255,255,.13), rgba(255,255,255,.035));
+  box-shadow:
+    inset 0 0 0 2px rgba(255,255,255,.12),
+    0 8px 18px rgba(0,0,0,.16);
 }}
 .hero-stat-number-wrap .hero-stat-number {{
-  text-shadow:none;
+  text-shadow:0 3px 0 rgba(0,0,0,.15);
 }}
 .hero-cover-decor {{
   position:absolute;
@@ -3580,7 +3582,12 @@ h1 {{
 }}
 
 .hero-vacancy-focus .hero-stat-caption {{
-  display:none;
+  color:{GOLD};
+  font-size:22px;
+  line-height:1;
+  font-weight:950;
+  letter-spacing:1.5px;
+  padding-bottom:8px;
 }}
 
 .hero-cover-message {{
