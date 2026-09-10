@@ -1208,7 +1208,7 @@ body:after {{
 .top-brand {{
   display:flex;
   align-items:center;
-  gap:9px;
+  gap:12px;
 }}
 
 .top-brand-mark {{
@@ -1226,13 +1226,13 @@ body:after {{
 }}
 
 .top-brand-logo {{
-  width:34px;
-  height:34px;
+  width:58px;
+  height:58px;
   object-fit:contain;
   display:block;
-  border-radius:9px;
+  border-radius:16px;
   background:#fff;
-  padding:3px;
+  padding:6px;
   box-shadow:inset 0 0 0 1px rgba(11,46,89,.12);
 }}
 
@@ -1244,7 +1244,7 @@ body:after {{
 
 .top-brand-name {{
   color:{NAVY};
-  font-size:14px;
+  font-size:15px;
   line-height:1;
   font-weight:950;
   letter-spacing:.75px;
