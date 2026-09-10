@@ -38,9 +38,31 @@ def qr_data_uri(url):
     return "data:image/png;base64," + base64.b64encode(b.getvalue()).decode()
 
 
+def instagram_logo_data_uri():
+    svg = """
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Instagram logo">
+      <defs>
+        <linearGradient id="ig-bg" x1="0" x2="1" y1="0" y2="1">
+          <stop offset="0%" stop-color="#feda75"/>
+          <stop offset="25%" stop-color="#fa7e1e"/>
+          <stop offset="50%" stop-color="#d62976"/>
+          <stop offset="75%" stop-color="#962fbf"/>
+          <stop offset="100%" stop-color="#4f5bd5"/>
+        </linearGradient>
+      </defs>
+      <rect width="128" height="128" rx="28" fill="url(#ig-bg)"/>
+      <rect x="28" y="28" width="72" height="72" rx="20" fill="none" stroke="#ffffff" stroke-width="6"/>
+      <circle cx="64" cy="64" r="17" fill="none" stroke="#ffffff" stroke-width="6"/>
+      <circle cx="83" cy="45" r="5" fill="#ffffff"/>
+    </svg>
+    """
+    encoded = base64.b64encode(svg.encode("utf-8")).decode("ascii")
+    return f"data:image/svg+xml;base64,{encoded}"
+
+
 def fetch_logo_data_uri(logo_domain):
     if not logo_domain:
-        return ""
+        return instagram_logo_data_uri()
 
     browser_headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
@@ -49,7 +71,7 @@ def fetch_logo_data_uri(logo_domain):
         "Referer": "https://www.google.com/",
     }
 
-    candidates = [        
+    candidates = [
         f"https://www.google.com/s2/favicons?domain={logo_domain}&sz=128",
     ]
 
@@ -66,7 +88,8 @@ def fetch_logo_data_uri(logo_domain):
         if payload:
             return f"data:{content_type};base64,{base64.b64encode(payload).decode('ascii')}"
 
-    return ""
+    print("Logo fetch failed for all candidates. Using Instagram fallback logo.")
+    return instagram_logo_data_uri()
 
 
 def esc(x):
