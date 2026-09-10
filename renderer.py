@@ -675,6 +675,7 @@ def build_html(
                 <div class="hero-stat-number-wrap">
                   <div class="hero-stat-number">{esc(metric)}</div>
                 </div>
+                <div class="hero-stat-caption">VACANCIES</div>
               </div>
             </div>
             """ if metric else ""}
@@ -3571,6 +3572,7 @@ h1 {{
   display:flex;
   align-items:flex-end;
   justify-content:flex-start;
+  gap:20px;
 }}
 
 .hero-vacancy-focus .hero-stat-number {{
