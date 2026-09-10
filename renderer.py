@@ -1229,9 +1229,9 @@ h1 {{
   z-index:2;
   margin:18px 0 0;
   color:{NAVY};
-  font-size:52px;
-  line-height:1.04;
-  letter-spacing:-1.9px;
+  font-size:42px;
+  line-height:1.06;
+  letter-spacing:-1.5px;
   font-weight:950;
   max-width:920px;
 }}
@@ -1249,7 +1249,7 @@ h1 {{
 
 .hook-title {{
   margin-top:18px;
-  font-size:42px;
+  font-size:38px;
   line-height:1.06;
 }}
 
@@ -3441,7 +3441,7 @@ footer {{
 }}
 
 h1 {{
-  font-size:55px;
+  font-size:46px;
   line-height:1.03;
 }}
 
