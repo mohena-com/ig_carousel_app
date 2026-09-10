@@ -1292,7 +1292,7 @@ body:after {{
 
 .top-brand-name {{
   color:{WHITE};
-  font-size:20px;
+  font-size:40px;
   line-height:1.05;
   font-weight:950;
   letter-spacing:.75px;
@@ -3578,7 +3578,7 @@ footer {{
 
 /* Global hierarchy */
 .top-brand-mark {{ width:40px; height:40px; font-size:13px; }}
-.top-brand-name {{ font-size:18px; }}
+.top-brand-name {{ font-size:36px; }}
 .top-brand-sub {{ font-size:10px; }}
 .top-slide {{ font-size:11px; padding:8px 12px; }}
 
