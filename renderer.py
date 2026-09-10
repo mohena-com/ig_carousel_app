@@ -4,6 +4,7 @@ import re
 import html
 import base64
 from io import BytesIO
+from urllib.parse import urlparse
 
 import qrcode
 from playwright.async_api import async_playwright
@@ -318,6 +319,30 @@ def _extract_vacancy_total(deck):
     return ""
 
 
+def _extract_logo_domain(deck):
+    """Extract the most likely organization domain from the deck's official links."""
+    if not isinstance(deck, dict):
+        return ""
+
+    for slide in (deck.get("slides") or []):
+        if not isinstance(slide, dict):
+            continue
+
+        for card in (slide.get("cards") or []):
+            if not isinstance(card, dict):
+                continue
+
+            value = clean_text(card.get("value") or card.get("url") or card.get("link"))
+            if not re.match(r"^https?://", value, re.I):
+                continue
+
+            parsed = urlparse(value)
+            if parsed.netloc:
+                return parsed.netloc
+
+    return ""
+
+
 def _extract_application_url(deck):
     """Find the most likely application/form URL for the Slide 1 QR."""
     candidates = []
@@ -580,7 +605,8 @@ def build_html(
     theme="professional_white",
     total_vacancies="",
     organisation="",
-    application_url=""
+    application_url="",
+    logo_url=""
 ):
     """
     Existing deck contract from carousel.py:
@@ -597,6 +623,11 @@ def build_html(
     raw_eyebrow = clean_text(slide.get("eyebrow"))
     eyebrow = clean_text(organisation) or raw_eyebrow or "Government Recruitment"
     subtitle = clean_text(slide.get("subtitle"))
+    brand_markup = (
+        f'<img class="top-brand-logo" src="{esc(logo_url)}" alt="{esc(eyebrow)} logo" />'
+        if logo_url and _normalise_type(slide.get("slide_type")) == "hook"
+        else '<div class="top-brand-mark">SD</div>'
+    )
     bullets = [
         clean_text(x)
         for x in (slide.get("bullets") or [])
@@ -1159,6 +1190,17 @@ body:after {{
   font-size:11px;
   font-weight:950;
   letter-spacing:.2px;
+}}
+
+.top-brand-logo {{
+  width:34px;
+  height:34px;
+  object-fit:contain;
+  display:block;
+  border-radius:9px;
+  background:#fff;
+  padding:3px;
+  box-shadow:inset 0 0 0 1px rgba(11,46,89,.12);
 }}
 
 .top-brand-copy {{
@@ -4168,6 +4210,8 @@ async def render(deck, out):
         vacancy_total = _extract_vacancy_total(deck)
         organisation = _infer_organisation_from_context(deck)
         application_url = _extract_application_url(deck)
+        logo_domain = _extract_logo_domain(deck)
+        logo_url = f"https://logos.hunter.io/{logo_domain}" if logo_domain else ""
 
         # Repair a common upstream mapping error without changing the source
         # facts: if Slide 1's eyebrow contains a qualification instead of the
@@ -4198,6 +4242,7 @@ async def render(deck, out):
                     total_vacancies=vacancy_total,
                     organisation=organisation,
                     application_url=application_url,
+                    logo_url=logo_url if _normalise_type(s.get("slide_type")) == "hook" else "",
                 ),
                 wait_until="load",
             )
