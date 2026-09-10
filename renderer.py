@@ -680,7 +680,7 @@ def build_html(
     subtitle = clean_text(slide.get("subtitle"))
     brand_markup = (
         f'<img class="top-brand-logo" src="{esc(logo_url)}" alt="{esc(eyebrow)} logo" />'
-        if logo_url and _normalise_type(slide.get("slide_type")) == "hook"
+        if logo_url
         else '<div class="top-brand-mark">SD</div>'
     )
     bullets = [
@@ -4203,21 +4203,14 @@ h1 {{
 
   <div class="topbar">
     <div class="top-brand">
-      <div class="top-brand-mark">SD</div>
-      <div class="top-brand-copy">
-        <div class="top-brand-name">SHAKTIDOOTAM</div>
-        <div class="top-brand-sub">Government Job Updates</div>
-      </div>
-    </div>
-    <div class="top-slide">SLIDE {int(number):02d} OF {int(total):02d}</div>
-  </div>
-
-  <div class="org-row{' hook-org-row' if stype == 'hook' else ''}">
-    <div class="org-brand-wrap">
       <div class="top-brand-card top-brand-logo-card">
         {brand_markup}
       </div>
-      <div class="eyebrow{' hook-eyebrow' if stype == 'hook' else ''}">{esc(eyebrow)}</div>
+      <div class="top-brand-card top-brand-copy-card">
+        <div class="top-brand-copy">
+          <div class="top-brand-name">{esc(eyebrow)}</div>
+        </div>
+      </div>
     </div>
   </div>
 
