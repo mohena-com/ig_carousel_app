@@ -64,6 +64,11 @@ def fetch_logo_data_uri(logo_domain):
     if not logo_domain:
         return instagram_logo_data_uri()
 
+    normalized_domain = clean_text(logo_domain).lower()
+    if "sarkariresult" in normalized_domain:
+        print("Sarkari Result domain detected. Using Instagram fallback logo.")
+        return instagram_logo_data_uri()
+
     browser_headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
         "Accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
