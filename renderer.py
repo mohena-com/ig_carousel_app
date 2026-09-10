@@ -1237,6 +1237,7 @@ body:after {{
   display:flex;
   align-items:stretch;
   gap:12px;
+  width:100%;
 }}
 
 .top-brand-card {{
@@ -1260,6 +1261,7 @@ body:after {{
 .top-brand-copy-card {{
   min-height:62px;
   min-width:240px;
+  flex:1 1 auto;
   padding:0 18px 0 16px;
   background:linear-gradient(135deg, #123b66 0%, #0b2e59 100%);
   border-color:rgba(11,46,89,.18);
