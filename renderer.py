@@ -5,6 +5,7 @@ import html
 import base64
 from io import BytesIO
 from urllib.parse import urlparse
+from urllib.request import urlopen
 
 import qrcode
 from playwright.async_api import async_playwright
@@ -35,6 +36,25 @@ def qr_data_uri(url):
     b = BytesIO()
     img.save(b, format="PNG")
     return "data:image/png;base64," + base64.b64encode(b.getvalue()).decode()
+
+
+def fetch_logo_data_uri(logo_domain):
+    if not logo_domain:
+        return ""
+
+    logo_url = f"https://logos.hunter.io/{logo_domain}"
+    try:
+        with urlopen(logo_url, timeout=10) as response:
+            content_type = response.headers.get_content_type() or "image/png"
+            payload = response.read()
+    except Exception as exc:
+        print(f"Failed to fetch logo from {logo_url}: {exc}")
+        return ""
+
+    if not payload:
+        return ""
+
+    return f"data:{content_type};base64,{base64.b64encode(payload).decode('ascii')}"
 
 
 def esc(x):
@@ -4211,8 +4231,9 @@ async def render(deck, out):
         organisation = _infer_organisation_from_context(deck)
         application_url = _extract_application_url(deck)
         logo_domain = _extract_logo_domain(deck)
-        logo_url = f"https://logos.hunter.io/{logo_domain}" if logo_domain else ""
-
+        print(f"Rendering {total} slides for {organisation} (logo: {logo_domain})")
+        logo_url = fetch_logo_data_uri(logo_domain)
+        print(f"Logo data URI loaded: {bool(logo_url)}")
         # Repair a common upstream mapping error without changing the source
         # facts: if Slide 1's eyebrow contains a qualification instead of the
         # organisation, move that qualification to the eligibility slide.
