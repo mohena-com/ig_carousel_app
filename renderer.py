@@ -1253,6 +1253,7 @@ body:after {{
 
 .top-brand-copy-card {{
   min-height:62px;
+  min-width:240px;
   padding:0 18px 0 16px;
   background:linear-gradient(180deg, rgba(255,255,255,.96) 0%, rgba(245,248,251,.96) 100%);
 }}
@@ -1333,12 +1334,14 @@ body:after {{
   z-index:2;
   margin-top:0;
   display:inline-flex;
+  align-items:center;
+  min-height:62px;
   align-self:flex-start;
   background:linear-gradient(135deg, {GOLD} 0%, #d79b1a 100%);
   color:{NAVY};
   border:2px solid rgba(7,43,71,.14);
   border-radius:14px;
-  padding:16px 24px;
+  padding:0 24px;
   font-size:30px;
   line-height:1.08;
   font-weight:1000;
@@ -1357,7 +1360,8 @@ body:after {{
   background:{NAVY};
   color:#ffffff;
   border-radius:14px;
-  padding:18px 28px;
+  min-height:62px;
+  padding:0 28px;
   font-size:32px;
   line-height:1.08;
   letter-spacing:.35px;
@@ -4199,14 +4203,10 @@ h1 {{
 
   <div class="topbar">
     <div class="top-brand">
-      <div class="top-brand-card top-brand-logo-card">
-        {brand_markup}
-      </div>
-      <div class="top-brand-card top-brand-copy-card">
-        <div class="top-brand-copy">
-          <div class="top-brand-name">SHAKTIDOOTAM</div>
-          <div class="top-brand-sub">Government Job Updates</div>
-        </div>
+      <div class="top-brand-mark">SD</div>
+      <div class="top-brand-copy">
+        <div class="top-brand-name">SHAKTIDOOTAM</div>
+        <div class="top-brand-sub">Government Job Updates</div>
       </div>
     </div>
     <div class="top-slide">SLIDE {int(number):02d} OF {int(total):02d}</div>
