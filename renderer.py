@@ -49,8 +49,7 @@ def fetch_logo_data_uri(logo_domain):
         "Referer": "https://www.google.com/",
     }
 
-    candidates = [
-        f"https://logos.hunter.io/{logo_domain}",
+    candidates = [        
         f"https://www.google.com/s2/favicons?domain={logo_domain}&sz=128",
     ]
 
@@ -1207,8 +1206,32 @@ body:after {{
 
 .top-brand {{
   display:flex;
-  align-items:center;
+  align-items:stretch;
   gap:12px;
+}}
+
+.top-brand-card {{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#fff;
+  border:1px solid rgba(11,46,89,.14);
+  border-radius:14px;
+  box-shadow:0 8px 18px rgba(11,46,89,.08);
+}}
+
+.top-brand-logo-card {{
+  min-width:74px;
+  min-height:62px;
+  padding:8px;
+  background:linear-gradient(135deg, #123b66 0%, #0b2e59 100%);
+  border-color:rgba(11,46,89,.18);
+}}
+
+.top-brand-copy-card {{
+  min-height:62px;
+  padding:0 18px 0 16px;
+  background:linear-gradient(180deg, rgba(255,255,255,.96) 0%, rgba(245,248,251,.96) 100%);
 }}
 
 .top-brand-mark {{
@@ -1226,14 +1249,14 @@ body:after {{
 }}
 
 .top-brand-logo {{
-  width:58px;
-  height:58px;
+  width:64px;
+  height:64px;
   object-fit:contain;
   display:block;
-  border-radius:16px;
+  border-radius:18px;
   background:#fff;
-  padding:6px;
-  box-shadow:inset 0 0 0 1px rgba(11,46,89,.12);
+  padding:8px;
+  box-shadow:0 0 0 2px rgba(255,255,255,.28), inset 0 0 0 1px rgba(11,46,89,.12);
 }}
 
 .top-brand-copy {{
@@ -1244,8 +1267,8 @@ body:after {{
 
 .top-brand-name {{
   color:{NAVY};
-  font-size:15px;
-  line-height:1;
+  font-size:16px;
+  line-height:1.05;
   font-weight:950;
   letter-spacing:.75px;
 }}
@@ -4147,10 +4170,14 @@ h1 {{
 
   <div class="topbar">
     <div class="top-brand">
-      {brand_markup}
-      <div class="top-brand-copy">
-        <div class="top-brand-name">SHAKTIDOOTAM</div>
-        <div class="top-brand-sub">Government Job Updates</div>
+      <div class="top-brand-card top-brand-logo-card">
+        {brand_markup}
+      </div>
+      <div class="top-brand-card top-brand-copy-card">
+        <div class="top-brand-copy">
+          <div class="top-brand-name">SHAKTIDOOTAM</div>
+          <div class="top-brand-sub">Government Job Updates</div>
+        </div>
       </div>
     </div>
     <div class="top-slide">SLIDE {int(number):02d} OF {int(total):02d}</div>
