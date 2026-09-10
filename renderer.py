@@ -1241,7 +1241,7 @@ h1 {{
   z-index:2;
   margin-top:10px;
   color:{MUTED};
-  font-size:21px;
+  font-size:18px;
   line-height:1.28;
   font-weight:600;
   max-width:900px;
@@ -1249,13 +1249,13 @@ h1 {{
 
 .hook-title {{
   margin-top:18px;
-  font-size:46px;
+  font-size:42px;
   line-height:1.06;
 }}
 
 .hook-subtitle {{
   margin-top:10px;
-  font-size:22px;
+  font-size:18px;
   line-height:1.2;
   color:{NAVY};
 }}
@@ -3446,7 +3446,7 @@ h1 {{
 }}
 
 .sub {{
-  font-size:23px;
+  font-size:20px;
   line-height:1.25;
 }}
 
