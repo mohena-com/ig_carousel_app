@@ -578,7 +578,6 @@ def build_html(
     number = slide.get("slide_number") or 1
     title = clean_text(slide.get("title")) or "Recruitment Update"
     # Keep the standard, user-facing title for the final links/CTA slide.
-    # The third CTA card can still say "TAP LINK IN BIO".
     if stype == "links":
         title = "Official Links & How to Apply"
     raw_eyebrow = clean_text(slide.get("eyebrow"))
@@ -1185,7 +1184,7 @@ body:after {{
   z-index:3;
   display:flex;
   align-items:flex-start;
-  margin-top:8px;
+  margin-top:10px;
 }}
 
 .eyebrow {{
@@ -1194,23 +1193,25 @@ body:after {{
   margin-top:0;
   display:inline-flex;
   align-self:flex-start;
-  background:{GOLD};
+  background:linear-gradient(135deg, {GOLD} 0%, #d79b1a 100%);
   color:{NAVY};
-  border-radius:10px;
-  padding:15px 22px;
-  font-size:27px;
-  line-height:1.12;
+  border:2px solid rgba(7,43,71,.14);
+  border-radius:14px;
+  padding:16px 24px;
+  font-size:30px;
+  line-height:1.08;
   font-weight:1000;
-  letter-spacing:.35px;
+  letter-spacing:.5px;
   text-transform:uppercase;
   max-width:900px;
-  box-shadow:0 4px 12px rgba(228,165,28,.16);
+  box-shadow:0 6px 16px rgba(228,165,28,.22);
+  text-shadow:0 1px 0 rgba(255,255,255,.12);
 }}
 
 h1 {{
   position:relative;
   z-index:2;
-  margin:15px 0 0;
+  margin:18px 0 0;
   color:{NAVY};
   font-size:52px;
   line-height:1.04;
@@ -3405,9 +3406,9 @@ footer {{
 .top-slide {{ font-size:11px; padding:8px 12px; }}
 
 .eyebrow {{
-  font-size:26px;
-  line-height:1.12;
-  padding:14px 21px;
+  font-size:28px;
+  line-height:1.08;
+  padding:15px 22px;
 }}
 
 h1 {{
