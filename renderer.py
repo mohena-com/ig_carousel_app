@@ -885,7 +885,7 @@ def build_html(
             action_defaults = [
                 ("SAVE THIS POST", "Save this post so you don't miss the application deadline.", "calendar"),
                 ("SHARE WITH FRIENDS", "Share this recruitment update with friends looking for a Government Job.", "share"),
-                ("TAP LINK IN BIO", "Use the link in our bio to continue to the application page.", "link"),
+                ("Official Links & How to Apply", "Use the official links to continue to the application page.", "link"),
             ]
 
             checklist_cards = []
@@ -1208,6 +1208,23 @@ body:after {{
   text-shadow:0 1px 0 rgba(255,255,255,.12);
 }}
 
+.hook-org-row {{
+  margin-top:8px;
+}}
+
+.hook-eyebrow {{
+  background:{NAVY};
+  color:#ffffff;
+  border-radius:14px;
+  padding:18px 28px;
+  font-size:32px;
+  line-height:1.08;
+  letter-spacing:.35px;
+  box-shadow:0 8px 20px rgba(18,42,67,.18);
+  border:2px solid rgba(255,255,255,.12);
+  max-width:none;
+}}
+
 h1 {{
   position:relative;
   z-index:2;
@@ -1229,6 +1246,19 @@ h1 {{
   line-height:1.28;
   font-weight:600;
   max-width:900px;
+}}
+
+.hook-title {{
+  margin-top:18px;
+  font-size:46px;
+  line-height:1.06;
+}}
+
+.hook-subtitle {{
+  margin-top:10px;
+  font-size:22px;
+  line-height:1.2;
+  color:{NAVY};
 }}
 
 .rule {{
@@ -4036,12 +4066,12 @@ h1 {{
     <div class="top-slide">SLIDE {int(number):02d} OF {int(total):02d}</div>
   </div>
 
-  <div class="org-row">
-    <div class="eyebrow">{esc(eyebrow)}</div>
+  <div class="org-row{' hook-org-row' if stype == 'hook' else ''}">
+    <div class="eyebrow{' hook-eyebrow' if stype == 'hook' else ''}">{esc(eyebrow)}</div>
   </div>
 
-  <h1>{esc(title)}</h1>
-  {f'<div class="sub">{esc(subtitle)}</div>' if subtitle else ""}
+  <h1 class="{'hook-title' if stype == 'hook' else ''}">{esc(title)}</h1>
+  {f'<div class="sub{' hook-subtitle' if stype == 'hook' else ''}">{esc(subtitle)}</div>' if subtitle else ""}
   <div class="rule"></div>
 
   {hero}
