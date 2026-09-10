@@ -5,7 +5,7 @@ import html
 import base64
 from io import BytesIO
 from urllib.parse import urlparse
-from urllib.request import urlopen
+from urllib.request import Request, urlopen
 
 import qrcode
 from playwright.async_api import async_playwright
@@ -42,19 +42,32 @@ def fetch_logo_data_uri(logo_domain):
     if not logo_domain:
         return ""
 
-    logo_url = f"https://logos.hunter.io/{logo_domain}"
-    try:
-        with urlopen(logo_url, timeout=10) as response:
-            content_type = response.headers.get_content_type() or "image/png"
-            payload = response.read()
-    except Exception as exc:
-        print(f"Failed to fetch logo from {logo_url}: {exc}")
-        return ""
+    browser_headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+        "Accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Referer": "https://www.google.com/",
+    }
 
-    if not payload:
-        return ""
+    candidates = [
+        f"https://logos.hunter.io/{logo_domain}",
+        f"https://www.google.com/s2/favicons?domain={logo_domain}&sz=128",
+    ]
 
-    return f"data:{content_type};base64,{base64.b64encode(payload).decode('ascii')}"
+    for logo_url in candidates:
+        try:
+            request = Request(logo_url, headers=browser_headers)
+            with urlopen(request, timeout=10) as response:
+                content_type = response.headers.get_content_type() or "image/png"
+                payload = response.read()
+        except Exception as exc:
+            print(f"Failed to fetch logo from {logo_url}: {exc}")
+            continue
+
+        if payload:
+            return f"data:{content_type};base64,{base64.b64encode(payload).decode('ascii')}"
+
+    return ""
 
 
 def esc(x):
