@@ -158,7 +158,7 @@ def _snapshot_card_html(card, index=0):
     label = clean_text(card.get("label")) or "Details"
     value = clean_text(card.get("value"))
     meta = clean_text(card.get("meta"))
-    cls = "snapshot-card snapshot-feature" if index == 0 else "snapshot-card"
+    cls = "snapshot-card"
     return f"""
     <div class="{cls}">
       <div class="snapshot-index">{index + 1:02d}</div>
@@ -1690,7 +1690,7 @@ h1 {{
   min-height:122px;
 }}
 .posts-v2.posts-many .snapshot-card:first-child {{
-  grid-row:1 / span 2;
+  grid-row:auto;
 }}
 .posts-v2.posts-many .snapshot-card:first-child .snapshot-value {{
   font-size:40px;
