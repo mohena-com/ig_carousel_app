@@ -139,7 +139,7 @@ def _post_card_html(card, index=0):
     label = clean_text(card.get("label")) or "Post"
     value = clean_text(card.get("value"))
     meta = clean_text(card.get("meta"))
-    count_label = "VACANCIES"
+    count_label = "VACANCIES" if re.search(r"vacanc|post", label, re.I) else "DETAIL"
     return f"""
     <div class="post-row">
       <div class="post-index">{index + 1:02d}</div>
@@ -827,18 +827,24 @@ def build_html(
     content = ""
     if stype != "hook":
         if stype == "posts":
-            # Slide 2 is an editorial post directory, not a dashboard.
-            # Use the dedicated post-row component so the post name remains
-            # the primary readable element and the vacancy count is secondary.
-            post_html = "".join(
-                _post_card_html(card, i) for i, card in enumerate(cards)
+            # Recruitment Snapshot: four facts become a deliberate 2x2 dashboard.
+            snapshot_html = "".join(
+                _snapshot_card_html(card, i) for i, card in enumerate(cards)
             )
-            posts_mode = (
-                "post-directory-one" if len(cards) == 1
-                else "post-directory-two" if len(cards) == 2
-                else "post-directory-many"
+            if len(cards) == 1:
+                snapshot_mode = "snapshot-one"
+            elif len(cards) == 2:
+                snapshot_mode = "snapshot-two"
+            elif len(cards) >= 11:
+                snapshot_mode = "snapshot-many snapshot-extra-dense"
+            else:
+                snapshot_mode = "snapshot-many"
+            posts_layout = (
+                "posts-one" if len(cards) == 1
+                else "posts-two" if len(cards) == 2
+                else "posts-many"
             )
-            body = f'<div class="post-directory {posts_mode}">{post_html}</div>'
+            body = f'<div class="snapshot-grid {snapshot_mode} posts-v2 {posts_layout}">{snapshot_html}</div>'
 
         elif stype == "eligibility":
             # Post-wise eligibility can contain many long qualifications.
@@ -3914,11 +3920,11 @@ h1 {{
 }}
 
 /* Slide 2 — recruitment snapshot */
-.snapshot-label {{ font-size:14px; }}
+.snapshot-label {{ font-size:15px; }}
 .snapshot-value {{ font-size:27px; }}
 .snapshot-meta {{ font-size:14px; }}
 
-.snapshot-feature .snapshot-label {{ font-size:16px; }}
+.snapshot-feature .snapshot-label {{ font-size:17px; }}
 .snapshot-feature .snapshot-value {{ font-size:76px; }}
 .snapshot-feature .snapshot-meta {{ font-size:15px; }}
 
@@ -3926,17 +3932,17 @@ h1 {{
 .snapshot-one .snapshot-card:first-child .snapshot-value {{ font-size:82px; }}
 
 /* Slide 3 — eligibility */
-.eligibility-code {{ font-size:13px; }}
+.eligibility-code {{ font-size:15px; }}
 .eligibility-value {{ font-size:21px; line-height:1.18; }}
 .eligibility-meta {{ font-size:13px; }}
 
 .eligibility-few .eligibility-value {{ font-size:30px; }}
 .eligibility-medium .eligibility-value {{ font-size:20px; }}
 .eligibility-many .eligibility-value {{ font-size:18px; }}
-.eligibility-many .eligibility-code {{ font-size:12px; }}
+.eligibility-many .eligibility-code {{ font-size:14px; }}
 
 /* Slide 4 — fees / selection / pay */
-.fee-primary-card .label {{ font-size:14px; }}
+.fee-primary-card .label {{ font-size:16px; }}
 .fee-primary-card .value {{ font-size:34px; }}
 .fee-secondary-grid .value {{ font-size:21px; }}
 
@@ -3957,7 +3963,7 @@ h1 {{
 }}
 
 .date-list .label {{
-  font-size:14px;
+  font-size:16px;
 }}
 
 .date-list .meta {{
@@ -4202,169 +4208,6 @@ h1 {{
     font-size:10px;
   }}
 }}
-
-
-/* ================================================================
-   SLIDE 2 — READABLE POST DIRECTORY
-   Primary information: post name. Secondary information: vacancy.
-   This intentionally replaces the old 3-column dashboard treatment.
-   ================================================================ */
-.post-directory {{
-  width:100%;
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:12px 14px;
-  align-content:start;
-}}
-
-.post-row {{
-  min-width:0;
-  min-height:104px;
-  display:grid;
-  grid-template-columns:34px minmax(0,1fr) 76px;
-  align-items:center;
-  gap:10px;
-  padding:14px 13px 14px 12px;
-  border:1px solid rgba(17,47,76,.10);
-  border-radius:16px;
-  background:rgba(255,255,255,.96);
-  box-shadow:0 5px 18px rgba(11,46,89,.045);
-  position:relative;
-  overflow:hidden;
-}}
-
-.post-row:before {{
-  content:"";
-  position:absolute;
-  left:0;
-  top:0;
-  bottom:0;
-  width:4px;
-  background:{{BLUE}};
-  opacity:.85;
-}}
-
-.post-index {{
-  width:30px;
-  height:30px;
-  border-radius:50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:{{SOFT_BLUE}};
-  color:{{BLUE}};
-  font-size:10px;
-  font-weight:900;
-  letter-spacing:.2px;
-}}
-
-.post-copy {{
-  min-width:0;
-}}
-
-.post-name {{
-  color:{{NAVY}};
-  font-size:19px;
-  line-height:1.12;
-  font-weight:850;
-  letter-spacing:-.25px;
-  overflow-wrap:anywhere;
-  word-break:normal;
-}}
-
-.post-meta {{
-  color:{{MUTED}};
-  font-size:11px;
-  line-height:1.2;
-  margin-top:5px;
-}}
-
-.post-count {{
-  min-width:0;
-  text-align:right;
-  align-self:center;
-  padding-left:4px;
-}}
-
-.post-count-number {{
-  color:{{NAVY}};
-  font-size:28px;
-  line-height:.95;
-  font-weight:950;
-  letter-spacing:-1.2px;
-}}
-
-.post-count-label {{
-  margin-top:5px;
-  color:{{BLUE}};
-  font-size:7px;
-  line-height:1;
-  font-weight:950;
-  letter-spacing:1px;
-}}
-
-.post-directory-one {{
-  grid-template-columns:1fr;
-}}
-
-.post-directory-one .post-row {{
-  min-height:150px;
-  grid-template-columns:44px minmax(0,1fr) 120px;
-  padding:22px;
-}}
-
-.post-directory-one .post-name {{
-  font-size:30px;
-}}
-
-.post-directory-one .post-count-number {{
-  font-size:54px;
-}}
-
-.post-directory-two {{
-  grid-template-columns:1fr 1fr;
-}}
-
-.post-directory-two .post-row {{
-  min-height:180px;
-  grid-template-columns:42px minmax(0,1fr) 92px;
-}}
-
-.post-directory-two .post-name {{
-  font-size:25px;
-}}
-
-.post-directory-two .post-count-number {{
-  font-size:40px;
-}}
-
-/* For 3–8 posts, use generous rows rather than tiny dashboard cards. */
-.post-directory-many .post-row {{
-  min-height:112px;
-}}
-
-/* 9+ posts: retain two columns but tighten only the row dimensions,
-   never the primary post-name typography. */
-.post-directory-many .post-name {{
-  font-size:18px;
-}}
-
-.post-directory-many .post-row {{
-  min-height:96px;
-  padding-top:11px;
-  padding-bottom:11px;
-}}
-
-.post-directory-many .post-count-number {{
-  font-size:27px;
-}}
-
-@media (max-width:900px) {{
-  .post-directory {{
-    grid-template-columns:1fr;
-  }}
-}}
-
 </style>
 </head>
 
