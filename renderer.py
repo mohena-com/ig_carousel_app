@@ -681,6 +681,8 @@ def build_html(
     raw_eyebrow = clean_text(slide.get("eyebrow"))
     eyebrow = clean_text(organisation) or raw_eyebrow or "Government Recruitment"
     subtitle = clean_text(slide.get("subtitle"))
+    subtitle_class = " hook-subtitle" if stype == "hook" else ""
+    subtitle_html = f'<div class="sub{subtitle_class}">{esc(subtitle)}</div>' if subtitle else ""
     brand_markup = (
         f'<img class="top-brand-logo" src="{esc(logo_url)}" alt="{esc(eyebrow)} logo" />'
         if logo_url
@@ -766,8 +768,6 @@ def build_html(
                   </div>
                 </div>
                 """ if application_end else ""
-
-        subtitle_html = f'<div class="sub{" hook-subtitle" if stype == "hook" else ""}">{esc(subtitle)}</div>' if subtitle else ""
 
         hero = f"""
         <section class="hero">
