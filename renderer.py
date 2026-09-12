@@ -757,59 +757,68 @@ def build_html(
         application_highlight = _extract_application_highlight(bullets)
         application_start, application_end = _extract_application_dates(application_highlight)
 
+        application_close_html = f"""
+                <div class="hero-window-row">
+                  <span class="hero-window-dot hero-window-dot-close"></span>
+                  <div class="hero-window-copy">
+                    <div class="hero-window-date">{esc(application_end)}</div>
+                    <div class="hero-window-meta">APPLICATION CLOSES</div>
+                  </div>
+                </div>
+                """ if application_end else ""
+
+        subtitle_html = f'<div class="sub{" hook-subtitle" if stype == "hook" else ""}">{esc(subtitle)}</div>' if subtitle else ""
+
         hero = f"""
         <section class="hero">
           <div class="hero-grid"></div>
 
-          <div class="hero-kicker-row">
-            <span class="hero-kicker">RECRUITMENT HIGHLIGHTS</span>
-            {f'<span class="hero-count">TOTAL VACANCIES</span>' if metric else ""}
-          </div>
+          <div class="hero-cover-main hero-cover-sample">
+            <div class="hero-cover-panel hero-cover-panel-primary">
+              <div class="hero-cover-panel-head">
+                <div class="hero-cover-panel-icon">☰</div>
+                <div class="hero-cover-panel-title">GOVERNMENT RECRUITMENT</div>
+              </div>
 
-          <div class="hero-main hero-cover-main">
-            <div class="hero-highlight-badge">
-              {esc(highlight)}
-            </div>
+              <div class="hero-vacancy-block">
+                <div class="hero-stat-number">{esc(metric or '94')}</div>
+                <div class="hero-vacancy-caption">TOTAL VACANCIES</div>
+              </div>
 
-            {f"""
-            <div class="hero-vacancy-focus">
-              <div class="hero-vacancy-label">TOTAL VACANCIES</div>
-              <div class="hero-vacancy-focus-row">
-                <div class="hero-stat-number-wrap">
-                  <div class="hero-stat-number">{esc(metric)}</div>
+              <div class="hero-post-strip">
+                <div class="hero-post-icon">◎</div>
+                <div class="hero-post-copy">
+                  <div class="hero-post-label">Post</div>
+                  <div class="hero-post-title">{esc(highlight or 'Management Trainee')}</div>
+                  <div class="hero-post-subtitle">{esc(subtitle or 'Multiple Disciplines')}</div>
                 </div>
-                <div class="hero-stat-caption">VACANCIES</div>
               </div>
             </div>
-            """ if metric else ""}
 
-            {f"""
-            <div class="hero-date-tablet hero-date-tablet-cover">
-              <div class="hero-date-item">
-                <div class="hero-date-label">{"APPLICATION START" if application_end else "APPLICATION DEADLINE"}</div>
-                <div class="hero-date-value">{esc(application_start or application_end)}</div>
+            <div class="hero-cover-panel hero-cover-panel-secondary">
+              <div class="hero-cover-panel-head">
+                <div class="hero-cover-panel-icon">🗓</div>
+                <div class="hero-cover-panel-title">APPLICATION WINDOW</div>
               </div>
-              {f"""
-              <div class="hero-date-arrow">↓</div>
-              <div class="hero-date-item">
-                <div class="hero-date-label">APPLICATION END</div>
-                <div class="hero-date-value">{esc(application_end)}</div>
+
+              <div class="hero-window-stack">
+                <div class="hero-window-row">
+                  <span class="hero-window-dot hero-window-dot-open"></span>
+                  <div class="hero-window-copy">
+                    <div class="hero-window-date">{esc(application_start or application_end or '08 Aug 2026')}</div>
+                    <div class="hero-window-meta">APPLICATION OPENS</div>
+                  </div>
+                </div>
+
+                {application_close_html}
               </div>
-              """ if application_end else ""}
-            </div>
-            """ if application_start or application_end else ""}
 
-            <div class="hero-cover-message">
-              <strong>Swipe to explore</strong>
-              <span>Posts • Eligibility • Dates • Application</span>
-            </div>
-
-            <div class="hero-cover-decor">
-              <div class="hero-gear gear-large">⚙</div>
-              <div class="hero-gear gear-small">⚙</div>
-              <div class="hero-cover-callout">
-                <strong>MASSIVE</strong>
-                <strong>HIRING ↗</strong>
+              <div class="hero-mode-box">
+                <div class="hero-mode-icon">◫</div>
+                <div class="hero-mode-copy">
+                  <div class="hero-mode-label">Application Mode</div>
+                  <div class="hero-mode-value">Online</div>
+                </div>
               </div>
             </div>
           </div>
@@ -3263,6 +3272,260 @@ h1 {{
   letter-spacing:1px;
 }}
 
+.hero-cover-sample {{
+  position:relative;
+  z-index:2;
+  display:grid;
+  grid-template-columns:1.02fr 1.18fr;
+  gap:20px;
+  margin-top:22px;
+}}
+
+.hero-cover-panel {{
+  position:relative;
+  border-radius:22px;
+  overflow:hidden;
+  min-height:360px;
+  padding:18px 18px 18px;
+  box-shadow:0 12px 24px rgba(11,46,89,.08);
+  border:1px solid rgba(11,46,89,.12);
+  background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.02));
+}}
+
+.hero-cover-panel-primary {{
+  background:linear-gradient(180deg, #0B2E59 0%, #0A2B54 100%);
+  color:{WHITE};
+}}
+
+.hero-cover-panel-secondary {{
+  background:linear-gradient(180deg, #0B2E59 0%, #0A2B54 100%);
+  color:{WHITE};
+}}
+
+.hero-cover-panel-head {{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:6px 10px 10px;
+  border-radius:12px;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.18);
+  color:{WHITE};
+  font-size:12px;
+  font-weight:950;
+  letter-spacing:1px;
+  text-transform:uppercase;
+}}
+
+.hero-cover-panel-icon {{
+  width:24px;
+  height:24px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:{GOLD};
+  color:{NAVY};
+  font-size:12px;
+  font-weight:900;
+  flex:none;
+}}
+
+.hero-cover-panel-primary .hero-cover-panel-head {{
+  background:linear-gradient(135deg, rgba(228,165,28,.42), rgba(228,165,28,.18));
+}}
+
+.hero-cover-panel-secondary .hero-cover-panel-head {{
+  background:linear-gradient(135deg, rgba(228,165,28,.42), rgba(228,165,28,.18));
+}}
+
+.hero-vacancy-block {{
+  position:relative;
+  z-index:2;
+  margin-top:26px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  min-height:170px;
+}}
+
+.hero-vacancy-block .hero-stat-number {{
+  color:{WHITE};
+  font-size:136px;
+  line-height:.8;
+  font-weight:950;
+  letter-spacing:-6px;
+  text-shadow:0 6px 0 rgba(0,0,0,.12);
+}}
+
+.hero-vacancy-caption {{
+  margin-top:18px;
+  color:{WHITE};
+  font-size:22px;
+  line-height:1;
+  letter-spacing:1.4px;
+  font-weight:950;
+  text-transform:uppercase;
+}}
+
+.hero-post-strip {{
+  position:absolute;
+  left:18px;
+  right:18px;
+  bottom:18px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  min-height:72px;
+  padding:14px 16px;
+  border-radius:16px;
+  background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.18);
+}}
+
+.hero-post-icon {{
+  width:36px;
+  height:36px;
+  border-radius:50%;
+  flex:none;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(255,255,255,.16);
+  border:1px solid rgba(255,255,255,.32);
+  font-size:18px;
+}}
+
+.hero-post-copy {{
+  min-width:0;
+}}
+
+.hero-post-label {{
+  color:#D9EAF6;
+  font-size:12px;
+  line-height:1;
+  font-weight:900;
+  letter-spacing:1px;
+  text-transform:uppercase;
+}}
+
+.hero-post-title {{
+  margin-top:4px;
+  color:{WHITE};
+  font-size:18px;
+  line-height:1.08;
+  font-weight:950;
+}}
+
+.hero-post-subtitle {{
+  margin-top:2px;
+  color:#D9EAF6;
+  font-size:12px;
+  line-height:1.2;
+  font-weight:700;
+}}
+
+.hero-window-stack {{
+  margin-top:26px;
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+}}
+
+.hero-window-row {{
+  display:flex;
+  align-items:flex-start;
+  gap:14px;
+  min-height:74px;
+}}
+
+.hero-window-dot {{
+  position:relative;
+  width:18px;
+  height:18px;
+  border-radius:50%;
+  margin-top:8px;
+  flex:none;
+}}
+
+.hero-window-dot-open {{
+  background:#2dd4aa;
+  box-shadow:0 0 0 4px rgba(45,212,170,.2);
+}}
+
+.hero-window-dot-close {{
+  background:#ef4444;
+  box-shadow:0 0 0 4px rgba(239,68,68,.2);
+}}
+
+.hero-window-copy {{
+  min-width:0;
+}}
+
+.hero-window-date {{
+  color:{WHITE};
+  font-size:30px;
+  line-height:1;
+  font-weight:950;
+  letter-spacing:-1px;
+}}
+
+.hero-window-meta {{
+  margin-top:8px;
+  color:#C9DFF1;
+  font-size:16px;
+  line-height:1;
+  font-weight:950;
+  letter-spacing:1px;
+  text-transform:uppercase;
+}}
+
+.hero-mode-box {{
+  margin-top:22px;
+  display:flex;
+  align-items:center;
+  gap:14px;
+  min-height:76px;
+  padding:14px 16px;
+  border-radius:16px;
+  background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.18);
+}}
+
+.hero-mode-icon {{
+  width:52px;
+  height:52px;
+  border-radius:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(255,255,255,.18);
+  border:1px solid rgba(255,255,255,.28);
+  font-size:24px;
+  color:{WHITE};
+}}
+
+.hero-mode-copy {{
+  min-width:0;
+}}
+
+.hero-mode-label {{
+  color:#D9EAF6;
+  font-size:12px;
+  line-height:1;
+  font-weight:900;
+  letter-spacing:1px;
+  text-transform:uppercase;
+}}
+
+.hero-mode-value {{
+  margin-top:6px;
+  color:{WHITE};
+  font-size:22px;
+  line-height:1;
+  font-weight:900;
+}}
+
 .hero-main {{
   position:relative;
   z-index:2;
@@ -4335,7 +4598,7 @@ h1 {{
   </div>
 
   <h1 class="{'hook-title' if stype == 'hook' else ''}">{esc(title)}</h1>
-  {f'<div class="sub{' hook-subtitle' if stype == 'hook' else ''}">{esc(subtitle)}</div>' if subtitle else ""}
+  {subtitle_html}
   <div class="rule"></div>
 
   {hero}
