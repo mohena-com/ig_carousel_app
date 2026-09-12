@@ -829,7 +829,7 @@ def build_html(
                 <div class="hero-cover-panel-title">APPLICATION WINDOW</div>
               </div>
 
-              <div class="hero-window-stack">
+              <div class="hero-window-stack{' single' if not application_end else ''}">
                 <div class="hero-window-row">
                   <span class="hero-window-dot hero-window-dot-open"></span>
                   <div class="hero-window-copy">
@@ -3033,7 +3033,8 @@ h1 {{
 }}
 
 .outro-actions {{
-  padding:17px 20px 19px;
+  min-height:240px;
+  padding:20px 22px 20px;
   border:1px solid {LINE};
   border-radius:21px;
   background:{SOFT};
@@ -3045,12 +3046,12 @@ h1 {{
   align-items:baseline;
   justify-content:space-between;
   gap:18px;
-  padding:0 3px 11px;
+  padding:0 3px 14px;
 }}
 
 .outro-actions-kicker {{
   color:{NAVY};
-  font-size:13px;
+  font-size:14px;
   font-weight:950;
   letter-spacing:.65px;
   text-transform:uppercase;
@@ -3058,17 +3059,18 @@ h1 {{
 
 .outro-actions-title {{
   color:{MUTED};
-  font-size:10px;
+  font-size:11px;
   font-weight:800;
   letter-spacing:.35px;
 }}
 
 .outro-support-panel {{
+  min-height:150px;
   display:flex;
   align-items:center;
   justify-content:space-between;
   gap:18px;
-  padding:18px 20px;
+  padding:20px 22px;
   border:1px solid {LINE};
   border-radius:18px;
   background:{WHITE};
@@ -3082,7 +3084,7 @@ h1 {{
 
 .outro-support-title {{
   color:{NAVY};
-  font-size:17px;
+  font-size:20px;
   line-height:1.2;
   font-weight:950;
 }}
@@ -3099,7 +3101,7 @@ h1 {{
   display:flex;
   align-items:flex-end;
   justify-content:flex-end;
-  gap:18px;
+  gap:20px;
   flex-wrap:nowrap;
 }}
 
@@ -3108,17 +3110,17 @@ h1 {{
   flex-direction:column;
   align-items:center;
   text-align:center;
-  min-width:76px;
+  min-width:90px;
 }}
 
 .outro-support-badge {{
-  width:52px;
-  height:52px;
+  width:60px;
+  height:60px;
   border-radius:50%;
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:22px;
+  font-size:26px;
   font-weight:900;
   line-height:1;
   color:{WHITE};
@@ -3142,18 +3144,18 @@ h1 {{
 }}
 
 .outro-support-label {{
-  margin-top:7px;
+  margin-top:8px;
   color:{NAVY};
-  font-size:13px;
+  font-size:14px;
   line-height:1;
   font-weight:950;
   letter-spacing:.2px;
 }}
 
 .outro-support-meta {{
-  margin-top:4px;
+  margin-top:5px;
   color:{MUTED};
-  font-size:9px;
+  font-size:10px;
   line-height:1.2;
   font-weight:700;
 }}
@@ -3164,22 +3166,22 @@ h1 {{
   margin:0;
   display:flex;
   flex-direction:column;
-  gap:10px;
+  gap:14px;
 }}
 
 .candidate-checklist li {{
   display:flex;
   align-items:flex-start;
-  gap:10px;
+  gap:12px;
   color:{INK};
-  font-size:15px;
+  font-size:18px;
   line-height:1.28;
   font-weight:700;
 }}
 
 .candidate-checklist .bullet-check {{
-  width:22px;
-  height:22px;
+  width:26px;
+  height:26px;
   flex:none;
   display:inline-flex;
   align-items:center;
@@ -3187,7 +3189,7 @@ h1 {{
   border-radius:50%;
   background:{NAVY};
   color:{WHITE};
-  font-size:12px;
+  font-size:14px;
   font-weight:950;
 }}
 
@@ -3730,9 +3732,19 @@ h1 {{
 
 .hero-window-stack {{
   margin-top:26px;
+  min-height:166px;
   display:flex;
   flex-direction:column;
+  justify-content:space-between;
   gap:18px;
+  box-sizing:border-box;
+}}
+
+/* Keep Slide 1's application-window area identical in height when only
+   one verified application date is available. The single date is centered
+   in the reserved window instead of pulling the Application Mode box up. */
+.hero-window-stack.single {{
+  justify-content:center;
 }}
 
 .hero-window-row {{
