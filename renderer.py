@@ -3610,7 +3610,7 @@ h1 {{
 }}
 
 .label {{
-  font-size:14px;
+  font-size:16px;
 }}
 
 .value {{
@@ -3627,10 +3627,10 @@ h1 {{
    become microscopic. The JS fit routine handles truly dense slides. */
 .card-grid.compact .value {{ font-size:21px; }}
 .card-grid.compact .meta {{ font-size:14px; }}
-.card-grid.dense .label {{ font-size:13px; }}
+.card-grid.dense .label {{ font-size:14px; }}
 .card-grid.dense .value {{ font-size:19px; line-height:1.17; }}
 .card-grid.dense .meta {{ font-size:13px; }}
-.card-grid.ultra-dense .label {{ font-size:12px; }}
+.card-grid.ultra-dense .label {{ font-size:13px; }}
 .card-grid.ultra-dense .value {{ font-size:17px; line-height:1.15; }}
 .card-grid.ultra-dense .meta {{ font-size:12px; }}
 
@@ -3775,7 +3775,7 @@ h1 {{
 
 /* Slide 1 — make the application window unmistakable */
 .hero-vacancy-label {{
-  font-size:14px;
+  font-size:16px;
   letter-spacing:3.2px;
 }}
 
@@ -3879,7 +3879,7 @@ h1 {{
 
 .hero-date-tablet-cover .hero-date-label {{
   color:{GOLD};
-  font-size:14px;
+  font-size:16px;
   font-weight:950;
   letter-spacing:1px;
 }}
@@ -3920,11 +3920,11 @@ h1 {{
 }}
 
 /* Slide 2 — recruitment snapshot */
-.snapshot-label {{ font-size:15px; }}
+.snapshot-label {{ font-size:17px; }}
 .snapshot-value {{ font-size:27px; }}
 .snapshot-meta {{ font-size:14px; }}
 
-.snapshot-feature .snapshot-label {{ font-size:17px; }}
+.snapshot-feature .snapshot-label {{ font-size:19px; }}
 .snapshot-feature .snapshot-value {{ font-size:76px; }}
 .snapshot-feature .snapshot-meta {{ font-size:15px; }}
 
@@ -3932,17 +3932,17 @@ h1 {{
 .snapshot-one .snapshot-card:first-child .snapshot-value {{ font-size:82px; }}
 
 /* Slide 3 — eligibility */
-.eligibility-code {{ font-size:15px; }}
+.eligibility-code {{ font-size:16px; }}
 .eligibility-value {{ font-size:21px; line-height:1.18; }}
 .eligibility-meta {{ font-size:13px; }}
 
 .eligibility-few .eligibility-value {{ font-size:30px; }}
 .eligibility-medium .eligibility-value {{ font-size:20px; }}
 .eligibility-many .eligibility-value {{ font-size:18px; }}
-.eligibility-many .eligibility-code {{ font-size:14px; }}
+.eligibility-many .eligibility-code {{ font-size:15px; }}
 
 /* Slide 4 — fees / selection / pay */
-.fee-primary-card .label {{ font-size:16px; }}
+.fee-primary-card .label {{ font-size:17px; }}
 .fee-primary-card .value {{ font-size:34px; }}
 .fee-secondary-grid .value {{ font-size:21px; }}
 
@@ -3963,7 +3963,7 @@ h1 {{
 }}
 
 .date-list .label {{
-  font-size:16px;
+  font-size:18px;
 }}
 
 .date-list .meta {{
@@ -4109,7 +4109,7 @@ h1 {{
 }}
 
 .snapshot-many .snapshot-label {{
-  font-size:11px;
+  font-size:13px;
   line-height:1.08;
   letter-spacing:.65px;
 }}
@@ -4172,7 +4172,7 @@ h1 {{
 }}
 
 .snapshot-card:not(.snapshot-feature) .snapshot-label {{
-  font-size:12px;
+  font-size:14px;
 }}
 
 /* Long titles get slightly tighter line spacing rather than being
