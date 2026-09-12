@@ -32,7 +32,8 @@ def make_deck(f: JobFacts):
     if not hero_bullets:
         fallback_details = f.application_steps or f.selection_process
         hero_bullets.extend(fallback_details[:3])
-    slides.append(IGSlide(slide_number=1,slide_type="hook",title="New Recruitment Alert",eyebrow=org,subtitle=name,cards=hero_cards,bullets=hero_bullets,footer_note=("⚠ Source conflict: " + f.conflicts[0] if f.conflicts else None)))
+    hook_title = name if name and len(name) <= 70 else "Recruitment Highlights"
+    slides.append(IGSlide(slide_number=1,slide_type="hook",title=hook_title,eyebrow=org,subtitle=(None if hook_title == name else name),cards=hero_cards,bullets=hero_bullets,footer_note=("⚠ Source conflict: " + f.conflicts[0] if f.conflicts else None)))
 
     # Posts are usually short enough for one dense two-column slide. The current
     # source set has at most 15 structured posts; the renderer can switch to a
@@ -126,7 +127,9 @@ def make_deck(f: JobFacts):
 
     link_cards=[c(x.label,x.url) for x in f.links]
     if f.source_url: link_cards.append(c("Source page",f.source_url))
-    slides.append(IGSlide(slide_number=6,slide_type="links",title="Official Links & How to Apply",eyebrow=org,cards=link_cards,bullets=usable_steps[:4],footer_note="Scan the QR code to open an official link. Check the notification before applying."))
+    # Keep the closing slide clean: application steps belong in the visual CTA
+    # and links, not as repeated/raw bullets.
+    slides.append(IGSlide(slide_number=6,slide_type="links",title="Official Links & How to Apply",eyebrow=org,cards=link_cards,bullets=[],footer_note="Scan the QR code to open an official link. Check the notification before applying."))
     return {
         "topic": name,
         "organisation": org,

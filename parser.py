@@ -149,6 +149,10 @@ def parse_fees(fee: str):
         x=clean(raw)
         if not x: continue
         if re.search(r"Eligibility Code|CTET Primary Level|Eligibility with Code",x,re.I): break
+        # Reject navigation/source fragments that can contain a number but
+        # are not fee records. These otherwise leak into fee cards.
+        if re.search(r"Notification|Examination|Exam Form|Official|Download|Click Here|Short Details|Candidate|Read the",x,re.I):
+            continue
         if re.search(r"Pay the (?:Exam|Examination) Fee|Fee Through",x,re.I):
             payment=x; continue
         if re.search(r"(?:Last Date|Correction|Exam Date|Admit Card|Online Form|Schedule)",x,re.I):
@@ -277,7 +281,16 @@ def parse_job(text: str) -> JobFacts:
     for x in how.splitlines():
         x=clean(x)
         if x.startswith("-"): x=clean(x.lstrip("-• "))
-        if x and not is_ignored_source_text(x) and not re.search(r"How to Fill|Sarkari Result|Candidate Can Apply|Notification.*Form 2026|\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\s+to\s+\d",x,re.I):
+        # Keep only useful application instructions. Drop scraper/OCR
+        # fragments, repeated titles and generic notification boilerplate.
+        bad_step = re.search(
+            r"How to Fill|Sarkari Result|Candidate Can Apply|Notification.*Form 2026|"
+            r"Candidate Read|Read the Notification|Apply the|Short Details|"
+            r"Examination$|^UKPSC$|^Candidate$|^Notification$|"
+            r"\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\s+to\s+\d",
+            x, re.I
+        )
+        if x and not is_ignored_source_text(x) and not bad_step:
             steps.append(x)
     links=parse_links(sections.get("OFFICIAL LINKS", ""))
     source=None
