@@ -1,6 +1,7 @@
 import json
 import os
 import re
+from pathlib import Path
 from typing import Any
 
 import requests
@@ -40,11 +41,49 @@ class CarouselGenerator:
         self.timeout = timeout
         self.chat_url = f"{self.ollama_host}/api/chat"
         self.last_facts: dict[str, Any] = {}
+        self.prompt_properties_file = Path(
+            os.getenv("GENERATOR_PROPERTIES_FILE")
+            or Path(__file__).with_name("generator.properties")
+        )
 
         print(f"Ollama host : {self.ollama_host}")
         print(f"Ollama model: {self.model}")
         print(f"Ollama timeout: {self.timeout}")
         print(f"Ollama chat URL: {self.chat_url}")
+
+    def _load_prompt_properties(self) -> dict[str, str]:
+        if not self.prompt_properties_file.exists():
+            return {}
+
+        properties: dict[str, str] = {}
+        current_key: str | None = None
+        current_lines: list[str] = []
+
+        def flush() -> None:
+            nonlocal current_key, current_lines
+            if current_key is not None:
+                properties[current_key] = "\n".join(current_lines).strip("\n")
+                current_key = None
+                current_lines = []
+
+        with self.prompt_properties_file.open("r", encoding="utf-8") as handle:
+            for raw_line in handle:
+                line = raw_line.rstrip("\n")
+                if re.match(r"^[A-Za-z0-9_.-]+=", line):
+                    flush()
+                    key, value = line.split("=", 1)
+                    current_key = key.strip()
+                    current_lines = [value.rstrip()]
+                    continue
+
+                if current_key is not None:
+                    current_lines.append(line)
+
+        flush()
+        return properties
+
+    def _get_prompt_text(self, key: str) -> str:
+        return self._load_prompt_properties().get(key, "")
 
     def check_connection(self) -> None:
         try:
@@ -327,13 +366,9 @@ DATE CANDIDATES FOUND BY PRE-SCAN:
         facts: dict[str, Any],
     ) -> list[dict[str, str]]:
 
-       system = """You are a professional Instagram editorial designer specializing in Indian government jobs, recruitment notifications, examinations, admissions and factual informational content.
-
-Your job is to transform verified recruitment information into an EXACTLY 6-slide Instagram carousel that feels:
-
-* premium
-* modern
-* calm
+        system = self._get_prompt_text("presentation_system_prompt")
+        if not system:
+            system = """You are a professional Instagram editorial designer specializing in Indian government jobs, recruitment notifications, examinations, admissions and factual informational content.
 * trustworthy
 * visually attractive
 * easy to scan on a mobile screen
