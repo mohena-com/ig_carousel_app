@@ -1022,6 +1022,36 @@ def build_html(
                 </div>
                 <ul class="candidate-checklist">{candidate_checklist}</ul>
               </section>
+
+              <section class="outro-support-panel" aria-label="Support options">
+                <div class="outro-support-copy">
+                  <div class="outro-support-title">Found this useful?</div>
+                  <div class="outro-support-subtitle">Support us to get more such updates!</div>
+                </div>
+
+                <div class="outro-support-actions">
+                  <div class="outro-support-item">
+                    <div class="outro-support-badge outro-support-like">❤</div>
+                    <div class="outro-support-label">LIKE</div>
+                    <div class="outro-support-meta">Show your support</div>
+                  </div>
+                  <div class="outro-support-item">
+                    <div class="outro-support-badge outro-support-follow">◎</div>
+                    <div class="outro-support-label">FOLLOW</div>
+                    <div class="outro-support-meta">For daily updates</div>
+                  </div>
+                  <div class="outro-support-item">
+                    <div class="outro-support-badge outro-support-share">↗</div>
+                    <div class="outro-support-label">SHARE</div>
+                    <div class="outro-support-meta">Help others</div>
+                  </div>
+                  <div class="outro-support-item">
+                    <div class="outro-support-badge outro-support-save">★</div>
+                    <div class="outro-support-label">SAVE</div>
+                    <div class="outro-support-meta">Keep for later</div>
+                  </div>
+                </div>
+              </section>
             </div>
             """
 
@@ -2713,6 +2743,101 @@ h1 {{
   font-size:10px;
   font-weight:800;
   letter-spacing:.35px;
+}}
+
+.outro-support-panel {{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:18px;
+  padding:18px 20px;
+  border:1px solid {LINE};
+  border-radius:18px;
+  background:{WHITE};
+  box-shadow:0 8px 22px rgba(11,46,89,.035);
+}}
+
+.outro-support-copy {{
+  flex:1;
+  min-width:0;
+}}
+
+.outro-support-title {{
+  color:{NAVY};
+  font-size:17px;
+  line-height:1.2;
+  font-weight:950;
+}}
+
+.outro-support-subtitle {{
+  margin-top:4px;
+  color:{MUTED};
+  font-size:12px;
+  line-height:1.3;
+  font-weight:700;
+}}
+
+.outro-support-actions {{
+  display:flex;
+  align-items:flex-end;
+  justify-content:flex-end;
+  gap:18px;
+  flex-wrap:nowrap;
+}}
+
+.outro-support-item {{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  text-align:center;
+  min-width:76px;
+}}
+
+.outro-support-badge {{
+  width:52px;
+  height:52px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:22px;
+  font-weight:900;
+  line-height:1;
+  color:{WHITE};
+  box-shadow:inset 0 0 0 2px rgba(255,255,255,.6);
+}}
+
+.outro-support-like {{
+  background:linear-gradient(135deg, #f64f59, #d32645);
+}}
+
+.outro-support-follow {{
+  background:linear-gradient(135deg, #28b6f6, #1d8ae6);
+}}
+
+.outro-support-share {{
+  background:linear-gradient(135deg, #22c08a, #14a57a);
+}}
+
+.outro-support-save {{
+  background:linear-gradient(135deg, #3c8dff, #2457d6);
+}}
+
+.outro-support-label {{
+  margin-top:7px;
+  color:{NAVY};
+  font-size:13px;
+  line-height:1;
+  font-weight:950;
+  letter-spacing:.2px;
+}}
+
+.outro-support-meta {{
+  margin-top:4px;
+  color:{MUTED};
+  font-size:9px;
+  line-height:1.2;
+  font-weight:700;
 }}
 
 .candidate-checklist {{
