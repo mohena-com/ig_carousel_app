@@ -272,12 +272,40 @@ def _checklist_panel_html(bullets, title):
     """
 
 
+def _date_kind(label):
+    """Return the semantic Slide-5 date group for a canonical display label."""
+    s = clean_text(label).lower()
+    if re.search(r"application\s+(starts?|opens?|begins?)", s):
+        return "application"
+    if re.search(r"application\s+(closes?|ends?|deadline|last\s+date)", s):
+        return "application"
+    if re.search(r"fee|payment", s):
+        return "additional"
+    if re.search(r"correction|edit|modification", s):
+        return "additional"
+    if re.search(r"exam|test|paper|written", s):
+        return "additional"
+    if re.search(r"admit|interview|skill|document|verification|merit|result|counselling|counseling|joining", s):
+        return "additional"
+    if re.search(r"date|deadline|schedule|window", s):
+        return "additional"
+    return "other"
+
+
 def _date_card_html(card, index=0):
     label = clean_text(card.get("label")) or "Important date"
     value = clean_text(card.get("value"))
     meta = clean_text(card.get("meta"))
+    kind = _date_kind(label)
+    row_class = "date-row"
+    if kind == "additional":
+        row_class += " additional-date-row"
+    if "correction" in label.lower():
+        row_class += " correction-row"
+    if len(label) > 18 or len(value) > 24:
+        row_class += " long-date-row"
     return f"""
-    <div class="date-row{' correction-row' if 'correction' in label.lower() else ''}{' long-date-row' if len(label) > 18 or len(value) > 24 else ''}">
+    <div class="{row_class}" data-date-kind="{esc(kind)}">
       <div class="date-marker">{index + 1}</div>
       <div class="date-copy">
         <div class="label">{esc(label)}</div>
@@ -930,6 +958,79 @@ def build_html(
                 """
 
         elif stype == "dates":
+            # Semantic split is performed from the labels emitted by carousel.py.
+            # Application tablet contains ONLY start/end. Additional tablet is
+            # omitted entirely when no additional verified date exists.
+            application_cards = []
+            additional_cards = []
+            for card in cards:
+                kind = _date_kind(card.get("label"))
+                if kind == "application":
+                    application_cards.append(card)
+                elif kind in {"additional", "other"}:
+                    additional_cards.append(card)
+
+            def date_tablet_html(items, kind, title, note):
+                if not items:
+                    return ""
+                rows = "".join(
+                    _date_card_html(card, i)
+                    for i, card in enumerate(items)
+                )
+                single = " single" if len(items) == 1 else ""
+                return f"""
+                <section class="date-subtablet {kind}{single}">
+                  <div class="date-subtablet-head">
+                    <div class="date-subtablet-kicker">{esc(title)}</div>
+                    <div class="date-subtablet-note">{esc(note)}</div>
+                  </div>
+                  <div class="date-subtablet-list">
+                    {rows}
+                  </div>
+                </section>
+                """
+
+            application_html = date_tablet_html(
+                application_cards,
+                "application",
+                "Application Dates",
+                "When to apply",
+            )
+            additional_html = date_tablet_html(
+                additional_cards,
+                "additional",
+                "Additional Dates",
+                "Other milestones",
+            )
+
+            if application_html and additional_html:
+                tablets_html = application_html + additional_html
+            elif application_html:
+                tablets_html = application_html.replace(
+                    'class="date-subtablet application',
+                    'class="date-subtablet application application-only',
+                    1,
+                )
+            elif additional_html:
+                tablets_html = additional_html.replace(
+                    'class="date-subtablet additional',
+                    'class="date-subtablet additional additional-only',
+                    1,
+                )
+            else:
+                tablets_html = """
+                <section class="date-subtablet application-only">
+                  <div class="date-subtablet-head">
+                    <div class="date-subtablet-kicker">Important Schedule</div>
+                    <div class="date-subtablet-note">Official notification</div>
+                  </div>
+                  <div class="date-subtablet-empty">
+                    Application dates are not available in the verified source.
+                    Check the official notification for the final schedule.
+                  </div>
+                </section>
+                """
+
             body = f"""
             <div class="dates-v3">
               <section class="dates-hero-panel">
@@ -940,20 +1041,17 @@ def build_html(
                   </div>
                   <div class="dates-live-badge">
                     <span class="dates-live-dot"></span>
-                    APPLICATIONS OPEN
+                    VERIFIED SCHEDULE
                   </div>
                 </div>
 
-                <div class="dates-step-timeline">
-                  {cards_html}
+                <div class="dates-subtablets">
+                  {tablets_html}
                 </div>
 
-                <div class="dates-open-banner">
-                  <div class="dates-open-icon">✓</div>
-                  <div>
-                    <div class="dates-open-title">APPLICATIONS OPEN NOW!</div>
-                    <div class="dates-open-subtitle">Apply before the deadline shown above.</div>
-                  </div>
+                <div class="dates-status-strip">
+                  <span class="status-dot"></span>
+                  <span>Check the official notification before applying.</span>
                 </div>
               </section>
 
@@ -1992,7 +2090,10 @@ h1 {{
 }}
 
 
-/* SLIDE 5 — DATES V3 / SAMPLE-INSPIRED */
+/* SLIDE 5 — DATES V4 / SEMANTIC TWO-TABLET LAYOUT
+   Tablet 1: application start/end only.
+   Tablet 2: additional verified dates only; omitted when empty.
+*/
 .dates-v3 {{
   display:flex;
   flex-direction:column;
@@ -2007,6 +2108,201 @@ h1 {{
   color:{WHITE};
   padding:27px 34px 25px;
   box-shadow:0 14px 30px rgba(11,46,89,.14);
+}}
+
+.dates-subtablets {{
+  position:relative;
+  z-index:2;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+  margin-top:24px;
+}}
+
+.date-subtablet {{
+  position:relative;
+  overflow:hidden;
+  min-width:0;
+  border:1px solid rgba(255,255,255,.18);
+  border-radius:19px;
+  background:rgba(255,255,255,.065);
+  padding:18px 19px 16px;
+}}
+
+.date-subtablet.additional {{
+  border-color:rgba(228,165,28,.42);
+  background:rgba(228,165,28,.075);
+}}
+
+.date-subtablet-head {{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding-bottom:12px;
+  border-bottom:1px solid rgba(255,255,255,.13);
+}}
+
+.date-subtablet-kicker {{
+  color:{GOLD};
+  font-size:12px;
+  line-height:1;
+  font-weight:950;
+  letter-spacing:1px;
+  text-transform:uppercase;
+}}
+
+.date-subtablet-note {{
+  color:rgba(255,255,255,.58);
+  font-size:9px;
+  line-height:1;
+  font-weight:800;
+  letter-spacing:.35px;
+  text-transform:uppercase;
+}}
+
+.date-subtablet-list {{
+  margin-top:12px;
+}}
+
+.date-subtablet .date-row {{
+  position:relative;
+  display:grid;
+  grid-template-columns:34px minmax(0,1fr);
+  gap:11px;
+  align-items:center;
+  min-height:72px;
+  padding:0 0 10px;
+}}
+
+.date-subtablet .date-row:last-child {{
+  padding-bottom:0;
+}}
+
+.date-subtablet .date-row:not(:last-child):before {{
+  content:"";
+  position:absolute;
+  left:16px;
+  top:35px;
+  bottom:-1px;
+  width:3px;
+  background:linear-gradient({BLUE}, {GOLD});
+  border-radius:3px;
+}}
+
+.date-subtablet .date-marker {{
+  width:32px;
+  height:32px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:{NAVY};
+  color:{WHITE};
+  border:3px solid {GOLD};
+  box-shadow:0 0 0 4px rgba(228,165,28,.10);
+  font-size:9px;
+  font-weight:950;
+  z-index:2;
+}}
+
+.date-subtablet.application .date-row:first-child .date-marker {{
+  border-color:#55B56A;
+  box-shadow:0 0 0 4px rgba(85,181,106,.11);
+}}
+
+.date-subtablet.application .date-row:first-child .label {{
+  color:#7DDB91;
+}}
+
+.date-subtablet .date-copy {{
+  min-width:0;
+}}
+
+.date-subtablet .date-copy .label {{
+  color:{GOLD};
+  font-size:12px;
+  line-height:1.1;
+  font-weight:950;
+  letter-spacing:.55px;
+  text-transform:uppercase;
+}}
+
+.date-subtablet .date-value {{
+  margin-top:4px;
+  color:{WHITE};
+  font-size:23px;
+  line-height:1.08;
+  font-weight:950;
+  white-space:normal;
+  overflow-wrap:anywhere;
+}}
+
+.date-subtablet .date-row.long-date-row .date-value,
+.date-subtablet .date-row.correction-row .date-value {{
+  font-size:19px;
+  line-height:1.1;
+}}
+
+.date-subtablet .date-copy .meta {{
+  margin-top:3px;
+  color:rgba(255,255,255,.62);
+  font-size:9px;
+  line-height:1.15;
+}}
+
+.date-subtablet-empty {{
+  min-height:116px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:rgba(255,255,255,.56);
+  font-size:12px;
+  font-weight:750;
+  text-align:center;
+}}
+
+.date-subtablet.single .date-row {{
+  min-height:82px;
+}}
+
+.date-subtablet.single .date-value {{
+  font-size:28px;
+}}
+
+.date-subtablet.application-only {{
+  grid-column:1 / -1;
+}}
+
+.date-subtablet.additional-only {{
+  grid-column:1 / -1;
+  max-width:100%;
+}}
+
+.dates-status-strip {{
+  position:relative;
+  z-index:2;
+  margin-top:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  color:rgba(255,255,255,.76);
+  font-size:10px;
+  line-height:1.2;
+  font-weight:800;
+  letter-spacing:.35px;
+}}
+
+.dates-status-strip .status-dot {{
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:{GOLD};
+}}
+
+.dates-open-banner {{
+  display:none;
 }}
 
 .dates-hero-panel:before {{
@@ -2272,11 +2568,18 @@ h1 {{
   .dates-hero-panel {{
     padding:24px 27px 22px;
   }}
-  .dates-step-timeline .date-copy {{
-    max-width:245px;
+  .dates-subtablets {{
+    grid-template-columns:1fr 1fr;
+    gap:12px;
   }}
-  .dates-step-timeline .date-value {{
-    font-size:27px;
+  .date-subtablet {{
+    padding:15px 15px 14px;
+  }}
+  .date-subtablet .date-value {{
+    font-size:20px;
+  }}
+  .date-subtablet.single .date-value {{
+    font-size:25px;
   }}
 }}
 

@@ -111,19 +111,43 @@ def make_deck(f: JobFacts):
         if not admin_topics: admin_topics.append("Details")
         slides.append(IGSlide(slide_number=4,slide_type="fees",title=" • ".join(admin_topics),eyebrow=org,cards=admin,footer_note="Only information available in the source is shown." if admin else None))
 
-    dates=[]
-    if f.application_start: dates.append(c("Application starts",f.application_start))
-    if f.application_end: dates.append(c("Application closes",f.application_end))
-    if f.fee_payment_last_date and not rest_elig: dates.append(c("Fee payment",f.fee_payment_last_date))
-    for x in f.correction_dates: dates.append(c("Correction",x))
-    for x in f.exam_dates: dates.append(c("Exam",x))
-    for x in f.other_dates: dates.append(c("Other important date",x))
-    if rest_elig:
-        # In the long-eligibility case, slide 5 carries the admin information.
-        dates = dates + admin
+    # Slide 5 has a strict semantic split:
+    #   1) APPLICATION DATES = only application_start/application_end
+    #   2) ADDITIONAL DATES = only other verified date fields
+    # Never mix salary, selection, organisation, post names, etc. into a date
+    # card merely to fill the layout.
+    application_dates=[]
+    if f.application_start:
+        application_dates.append(c("Application starts",f.application_start))
+    if f.application_end:
+        application_dates.append(c("Application closes",f.application_end))
+
+    additional_dates=[]
+    if f.fee_payment_last_date:
+        additional_dates.append(c("Fee payment deadline",f.fee_payment_last_date))
+    for x in f.correction_dates:
+        additional_dates.append(c("Correction",x))
+    for x in f.exam_dates:
+        additional_dates.append(c("Exam",x))
+    for x in f.other_dates:
+        additional_dates.append(c("Other important date",x))
+
+    # In the long-eligibility case slide 4 is reserved for the eligibility
+    # continuation. Keep Slide 5 date-pure rather than leaking admin fields
+    # (salary/selection/etc.) into the Additional Dates tablet.
+    dates=application_dates + additional_dates
+
     usable_steps=[x for x in f.application_steps if x not in {".","September 2026","Exam Online Form"}]
     bullets=usable_steps[:6]
-    slides.append(IGSlide(slide_number=5,slide_type="dates",title="Important Dates & Checklist",eyebrow=org,cards=dates,bullets=bullets,footer_note="Verify the final schedule in the official notification."))
+    slides.append(IGSlide(
+        slide_number=5,
+        slide_type="dates",
+        title="Important Dates & Checklist",
+        eyebrow=org,
+        cards=dates,
+        bullets=bullets,
+        footer_note="Verify the final schedule in the official notification."
+    ))
 
     link_cards=[c(x.label,x.url) for x in f.links]
     if f.source_url: link_cards.append(c("Source page",f.source_url))
