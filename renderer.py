@@ -1389,12 +1389,13 @@ h1 {{
 .sub {{
   position:relative;
   z-index:2;
+  display:block;
+  width:100%;
   margin-top:10px;
   color:{MUTED};
-  font-size:18px;
+  font-size:22px;
   line-height:1.28;
   font-weight:600;
-  max-width:900px;
 }}
 
 .hook-title {{
@@ -1405,7 +1406,7 @@ h1 {{
 
 .hook-subtitle {{
   margin-top:10px;
-  font-size:18px;
+  font-size:22px;
   line-height:1.2;
   color:{NAVY};
 }}
@@ -1465,8 +1466,8 @@ h1 {{
 }}
 
 .label {{
-  color:{BLUE};
-  font-size:11px;
+  color:{GOLD};
+  font-size:14px;
   line-height:1.1;
   font-weight:950;
   letter-spacing:.65px;
@@ -1495,14 +1496,14 @@ h1 {{
 
 .card-grid.dense {{ gap:10px; }}
 .card-grid.dense .info-card {{ min-height:83px; padding:11px 13px; border-radius:13px; }}
-.card-grid.dense .label {{ font-size:10px; }}
+.card-grid.dense .label {{ font-size:13px; }}
 .card-grid.dense .value {{ font-size:17px; line-height:1.16; }}
 .card-grid.dense .meta {{ font-size:12px; margin-top:4px; }}
 
 .card-grid.ultra-dense {{ gap:8px; }}
 .card-grid.ultra-dense .info-card {{ min-height:69px; padding:8px 11px; border-radius:11px; }}
 .card-grid.ultra-dense .card-top {{ margin-bottom:4px; }}
-.card-grid.ultra-dense .label {{ font-size:9px; }}
+.card-grid.ultra-dense .label {{ font-size:12px; }}
 .card-grid.ultra-dense .value {{ font-size:15px; line-height:1.12; }}
 .card-grid.ultra-dense .meta {{ font-size:10px; margin-top:3px; }}
 
