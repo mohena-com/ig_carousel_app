@@ -3879,14 +3879,14 @@ h1 {{
 
 .hero-date-tablet-cover .hero-date-label {{
   color:{GOLD};
-  font-size:12px;
+  font-size:14px;
   font-weight:950;
   letter-spacing:1px;
 }}
 
 .hero-date-tablet-cover .hero-date-value {{
   color:{WHITE};
-  font-size:23px;
+  font-size:28px;
   line-height:1.05;
   font-weight:900;
   white-space:nowrap;
