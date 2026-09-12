@@ -38,22 +38,20 @@ def qr_data_uri(url):
     return "data:image/png;base64," + base64.b64encode(b.getvalue()).decode()
 
 
-def instagram_logo_data_uri():
+def briefcase_logo_data_uri():
     svg = """
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Instagram logo">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Briefcase logo">
       <defs>
-        <linearGradient id="ig-bg" x1="0" x2="1" y1="0" y2="1">
-          <stop offset="0%" stop-color="#feda75"/>
-          <stop offset="25%" stop-color="#fa7e1e"/>
-          <stop offset="50%" stop-color="#d62976"/>
-          <stop offset="75%" stop-color="#962fbf"/>
-          <stop offset="100%" stop-color="#4f5bd5"/>
+        <linearGradient id="briefcase-bg" x1="0" x2="1" y1="0" y2="1">
+          <stop offset="0%" stop-color="#0B2E59"/>
+          <stop offset="100%" stop-color="#145DA0"/>
         </linearGradient>
       </defs>
-      <rect width="128" height="128" rx="28" fill="url(#ig-bg)"/>
-      <rect x="28" y="28" width="72" height="72" rx="20" fill="none" stroke="#ffffff" stroke-width="6"/>
-      <circle cx="64" cy="64" r="17" fill="none" stroke="#ffffff" stroke-width="6"/>
-      <circle cx="83" cy="45" r="5" fill="#ffffff"/>
+      <rect width="128" height="128" rx="28" fill="url(#briefcase-bg)"/>
+      <rect x="24" y="45" width="80" height="50" rx="10" fill="none" stroke="#ffffff" stroke-width="6"/>
+      <path d="M42 45V38c0-7 5-12 12-12h20c7 0 12 5 12 12v7" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round"/>
+      <path d="M52 64h24" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round"/>
+      <path d="M64 64v10" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round"/>
     </svg>
     """
     encoded = base64.b64encode(svg.encode("utf-8")).decode("ascii")
@@ -62,12 +60,12 @@ def instagram_logo_data_uri():
 
 def fetch_logo_data_uri(logo_domain):
     if not logo_domain:
-        return instagram_logo_data_uri()
+        return briefcase_logo_data_uri()
 
     normalized_domain = clean_text(logo_domain).lower()
     if "sarkariresult" in normalized_domain:
-        print("Sarkari Result domain detected. Using Instagram fallback logo.")
-        return instagram_logo_data_uri()
+        print("Sarkari Result domain detected. Using briefcase fallback logo.")
+        return briefcase_logo_data_uri()
 
     browser_headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
@@ -93,8 +91,8 @@ def fetch_logo_data_uri(logo_domain):
         if payload:
             return f"data:{content_type};base64,{base64.b64encode(payload).decode('ascii')}"
 
-    print("Logo fetch failed for all candidates. Using Instagram fallback logo.")
-    return instagram_logo_data_uri()
+    print("Logo fetch failed for all candidates. Using briefcase fallback logo.")
+    return briefcase_logo_data_uri()
 
 
 def esc(x):
@@ -955,19 +953,17 @@ def build_html(
             """
 
         elif stype == "links":
-            # Slide 6 is a deliberate CTA/outro: make the official source,
-            # QR access and three user actions visually dominant.
             url_cards = [
                 c for c in cards
                 if isinstance(c.get("value"), str)
                 and re.match(r"^https?://", c.get("value", "").strip())
             ]
 
-            qr_blocks = []
             qr_labels = [
                 ("SCAN TO APPLY", "APPLICATION FORM"),
                 ("SCAN FOR PDF", "RECRUITMENT NOTIFICATION"),
             ]
+            qr_blocks = []
             for i, card in enumerate(url_cards[:2]):
                 label1, label2 = qr_labels[min(i, len(qr_labels) - 1)]
                 qr_blocks.append(
@@ -985,86 +981,23 @@ def build_html(
                 )
 
             qr_html = "".join(qr_blocks)
-            first_url = clean_text(url_cards[0].get("value")) if url_cards else ""
+            qr_stack_class = "outro-qr-stack outro-qr-stack-two" if len(qr_blocks) > 1 else "outro-qr-stack outro-qr-stack-one"
 
-            action_defaults = [
-                ("SAVE THIS POST", "Save this post so you don't miss the application deadline.", "calendar"),
-                ("SHARE WITH FRIENDS", "Share this recruitment update with friends looking for a Government Job.", "share"),
-                ("Official Links & How to Apply", "Use the official links to continue to the application page.", "link"),
+            checklist_items = [
+                "Check eligibility",
+                "Verify application dates",
+                "Keep documents ready",
+                "Read official notification",
             ]
-
-            checklist_cards = []
-            for i, x in enumerate(bullets[:3]):
-                title, fallback_text, icon_name = action_defaults[i]
-                raw = clean_text(x)
-                # Keep the source bullet when it contains useful content;
-                # otherwise use the standard CTA wording.
-                step_text = raw or fallback_text
-                checklist_cards.append(
-                    f"""
-                    <div class="outro-action-card {'outro-action-primary' if i == 2 else ''}">
-                      <div class="outro-action-top">
-                        <div class="outro-action-number">{i+1:02d}</div>
-                        <div class="outro-action-copy">
-                          <div class="outro-action-title">{esc(title)}</div>
-                          <div class="outro-action-text">{esc(step_text)}</div>
-                        </div>
-                      </div>
-                      <div class="outro-action-art outro-art-{icon_name}" aria-hidden="true">
-                        <svg viewBox="0 0 72 58">
-                          {(
-                            '<rect x="14" y="7" width="34" height="42" rx="5"></rect>'
-                            '<line x1="21" y1="14" x2="41" y2="14"></line>'
-                            '<circle cx="31" cy="42" r="2"></circle>'
-                            '<circle cx="51" cy="39" r="12"></circle>'
-                            '<line x1="51" y1="32" x2="51" y2="39"></line>'
-                            '<line x1="51" y1="39" x2="56" y2="42"></line>'
-                          ) if icon_name == "calendar" else (
-                            '<path d="M13 30c8-5 14-10 21-10 6 0 9 5 13 5 4 0 8-4 12-9"></path>'
-                            '<path d="M47 12h12v12"></path>'
-                            '<path d="M19 38c4 7 12 10 18 5l8-8"></path>'
-                            '<path d="M25 23l-8 8 7 7 8-8"></path>'
-                          ) if icon_name == "share" else (
-                            '<rect x="22" y="5" width="28" height="48" rx="5"></rect>'
-                            '<circle cx="36" cy="47" r="2"></circle>'
-                            '<path d="M29 31l5-5 4 4 8-10"></path>'
-                            '<path d="M42 20h4v4"></path>'
-                          )}
-                        </svg>
-                      </div>
-                    </div>
-                    """
-                )
-
-            # If the source contains fewer than three bullets, fill the visual
-            # CTA row with the standard actions rather than leaving it sparse.
-            while len(checklist_cards) < 3:
-                i = len(checklist_cards)
-                title, fallback_text, icon_name = action_defaults[i]
-                checklist_cards.append(
-                    f"""
-                    <div class="outro-action-card {'outro-action-primary' if i == 2 else ''}">
-                      <div class="outro-action-top">
-                        <div class="outro-action-number">{i+1:02d}</div>
-                        <div class="outro-action-copy">
-                          <div class="outro-action-title">{esc(title)}</div>
-                          <div class="outro-action-text">{esc(fallback_text)}</div>
-                        </div>
-                      </div>
-                      <div class="outro-action-art outro-art-{icon_name}" aria-hidden="true">
-                        <svg viewBox="0 0 72 58">
-                          {(
-                            '<rect x="14" y="7" width="34" height="42" rx="5"></rect><line x1="21" y1="14" x2="41" y2="14"></line><circle cx="31" cy="42" r="2"></circle><circle cx="51" cy="39" r="12"></circle><line x1="51" y1="32" x2="51" y2="39"></line><line x1="51" y1="39" x2="56" y2="42"></line>'
-                          ) if icon_name == "calendar" else (
-                            '<path d="M13 30c8-5 14-10 21-10 6 0 9 5 13 5 4 0 8-4 12-9"></path><path d="M47 12h12v12"></path><path d="M19 38c4 7 12 10 18 5l8-8"></path>'
-                          ) if icon_name == "share" else (
-                            '<rect x="22" y="5" width="28" height="48" rx="5"></rect><circle cx="36" cy="47" r="2"></circle><path d="M29 31l5-5 4 4 8-10"></path>'
-                          )}
-                        </svg>
-                      </div>
-                    </div>
-                    """
-                )
+            candidate_checklist = "".join(
+                f"""
+                <li>
+                  <span class="bullet-check">✓</span>
+                  <span>{esc(item)}</span>
+                </li>
+                """
+                for item in checklist_items
+            )
 
             body = f"""
             <div class="outro-v4">
@@ -1074,23 +1007,20 @@ def build_html(
                   <div class="outro-official-title">
                     Scan to open the official<br>recruitment application
                   </div>
-                  <div class="outro-official-url">{esc(first_url)}</div>
                   <div class="outro-verify">VERIFY DETAILS BEFORE APPLYING</div>
                 </div>
 
-                <div class="outro-qr-stack">
+                <div class="{qr_stack_class}">
                   {qr_html}
                 </div>
               </section>
 
               <section class="outro-actions">
                 <div class="outro-actions-head">
-                  <div class="outro-actions-kicker">DON'T MISS THE DEADLINE</div>
-                  <div class="outro-actions-title">3 things to do before you leave</div>
+                  <div class="outro-actions-kicker">CANDIDATE CHECKLIST</div>
+                  <div class="outro-actions-title">BEFORE YOU APPLY</div>
                 </div>
-                <div class="outro-action-grid">
-                  {''.join(checklist_cards)}
-                </div>
+                <ul class="candidate-checklist">{candidate_checklist}</ul>
               </section>
             </div>
             """
@@ -2665,10 +2595,21 @@ h1 {{
 
 .outro-qr-stack {{
   display:flex;
-  flex-direction:column;
   align-items:flex-end;
-  justify-content:center;
+  justify-content:flex-end;
   gap:12px;
+}}
+
+.outro-qr-stack-one {{
+  flex-direction:column;
+  width:100%;
+}}
+
+.outro-qr-stack-two {{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  width:100%;
+  align-items:stretch;
 }}
 
 .outro-qr-card {{
@@ -2772,6 +2713,39 @@ h1 {{
   font-size:10px;
   font-weight:800;
   letter-spacing:.35px;
+}}
+
+.candidate-checklist {{
+  list-style:none;
+  padding:0;
+  margin:0;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}}
+
+.candidate-checklist li {{
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+  color:{INK};
+  font-size:15px;
+  line-height:1.28;
+  font-weight:700;
+}}
+
+.candidate-checklist .bullet-check {{
+  width:22px;
+  height:22px;
+  flex:none;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:50%;
+  background:{NAVY};
+  color:{WHITE};
+  font-size:12px;
+  font-weight:950;
 }}
 
 .outro-action-grid {{
