@@ -1689,6 +1689,12 @@ h1 {{
 .posts-v2.posts-many .snapshot-card {{
   min-height:122px;
 }}
+.posts-v2.posts-many .snapshot-card:nth-child(4) {{
+  grid-column:auto;
+  min-height:122px;
+  background:{WHITE};
+  border-top:1px solid {LINE};
+}}
 .posts-v2.posts-many .snapshot-card:first-child {{
   grid-row:auto;
 }}
