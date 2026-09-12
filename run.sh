@@ -8,8 +8,9 @@ set -euo pipefail
 #
 # Usage:
 #   ./run.sh
+#   ./run.sh --max-jobs 3
 #   ./run.sh --reports-dir "/path/to/reports/jobs" --output-dir "/path/to/output_carousel"
-#   ./run.sh --reports-dir "/path/to/reports" --output-dir "/path/to/output_carousel"
+#   ./run.sh --reports-dir "/path/to/reports" --output-dir "/path/to/output_carousel" --max-jobs 3
 #
 # The script accepts either a jobs directory or its parent reports directory.
 # If the supplied directory contains a "jobs" subdirectory, that subdirectory
@@ -17,6 +18,8 @@ set -euo pipefail
 
 export OLLAMA_HOST="${OLLAMA_HOST:-http://webmaster-ai.local:11434}"
 export OLLAMA_MODEL="${OLLAMA_MODEL:-qwen3:8b}"
+
+MAX_JOBS=""
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
@@ -45,15 +48,27 @@ while [[ $# -gt 0 ]]; do
             OUTPUT_DIR="$2"
             shift 2
             ;;
+        --max-jobs)
+            [[ $# -ge 2 ]] || { echo "ERROR: --max-jobs requires a positive integer"; exit 2; }
+            if [[ ! "$2" =~ ^[1-9][0-9]*$ ]]; then
+                echo "ERROR: --max-jobs must be a positive integer"
+                exit 2
+            fi
+            MAX_JOBS="$2"
+            shift 2
+            ;;
         -h|--help)
             cat <<EOF
 Usage:
   ./run.sh
+  ./run.sh --max-jobs 3
   ./run.sh --reports-dir PATH --output-dir PATH
+  ./run.sh --reports-dir PATH --output-dir PATH --max-jobs 3
 
 Defaults:
   reports: ../reports/jobs/*.txt
   output : ../output_carousel/<job-file-stem>/
+  max-jobs: all files
 
 Each TXT file is processed independently and produces exactly six slides
 inside its own output folder.
@@ -83,6 +98,10 @@ OUTPUT_DIR="$(mkdir -p "$OUTPUT_DIR" && cd "$OUTPUT_DIR" && pwd)"
 shopt -s nullglob
 FILES=("$REPORTS_DIR"/*.txt)
 shopt -u nullglob
+
+if [[ -n "$MAX_JOBS" ]]; then
+    FILES=("${FILES[@]:0:$MAX_JOBS}")
+fi
 
 if [[ ${#FILES[@]} -eq 0 ]]; then
     echo "No .txt job reports found in:"
