@@ -1690,7 +1690,7 @@ h1 {{
   min-height:122px;
 }}
 .posts-v2.posts-many .snapshot-card:first-child {{
-  grid-row:auto;
+  grid-row:1 / span 2;
 }}
 .posts-v2.posts-many .snapshot-card:first-child .snapshot-value {{
   font-size:40px;
