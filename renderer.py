@@ -787,7 +787,22 @@ def build_html(
         application_highlight = _extract_application_highlight(bullets)
         application_start, application_end = _extract_application_dates(application_highlight)
 
-        application_close_html = f"""
+        application_window_rows = []
+        if application_start:
+            application_window_rows.append(
+                f"""
+                <div class="hero-window-row">
+                  <span class="hero-window-dot hero-window-dot-open"></span>
+                  <div class="hero-window-copy">
+                    <div class="hero-window-date">{esc(application_start)}</div>
+                    <div class="hero-window-meta">APPLICATION OPENS</div>
+                  </div>
+                </div>
+                """
+            )
+        if application_end:
+            application_window_rows.append(
+                f"""
                 <div class="hero-window-row">
                   <span class="hero-window-dot hero-window-dot-close"></span>
                   <div class="hero-window-copy">
@@ -795,7 +810,18 @@ def build_html(
                     <div class="hero-window-meta">APPLICATION CLOSES</div>
                   </div>
                 </div>
-                """ if application_end else ""
+                """
+            )
+
+        application_window_html = (
+            f"""
+              <div class="hero-window-stack{' single' if len(application_window_rows) == 1 else ''}">
+                {''.join(application_window_rows)}
+              </div>
+            """
+            if application_window_rows
+            else ""
+        )
 
         hero = f"""
         <section class="hero">
@@ -829,17 +855,7 @@ def build_html(
                 <div class="hero-cover-panel-title">APPLICATION WINDOW</div>
               </div>
 
-              <div class="hero-window-stack{' single' if not application_end else ''}">
-                <div class="hero-window-row">
-                  <span class="hero-window-dot hero-window-dot-open"></span>
-                  <div class="hero-window-copy">
-                    <div class="hero-window-date">{esc(application_start or application_end or '08 Aug 2026')}</div>
-                    <div class="hero-window-meta">APPLICATION OPENS</div>
-                  </div>
-                </div>
-
-                {application_close_html}
-              </div>
+              {application_window_html}
 
               <div class="hero-mode-box">
                 <div class="hero-mode-icon">◫</div>
