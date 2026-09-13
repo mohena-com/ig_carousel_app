@@ -27,6 +27,8 @@ def make_deck(f: JobFacts):
     hero_bullets=[]
     if f.application_start and f.application_end:
         hero_bullets.append(f"Applications: {f.application_start} → {f.application_end}")
+    elif f.application_start:
+        hero_bullets.append(f"Application starts: {f.application_start}")
     elif f.application_end:
         hero_bullets.append(f"Application deadline: {f.application_end}")
     if not hero_bullets:

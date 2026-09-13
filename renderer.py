@@ -455,13 +455,39 @@ def _extract_application_url(deck):
 
 
 def _extract_application_dates(text):
-    """Extract available application dates, including ISO dates."""
+    """Extract available application dates, preserving the semantic role of each date."""
     value = clean_text(text)
+    if not value:
+        return "", ""
+
     dates = re.findall(
-        r"\b(?:\d{1,2}[/-]\d{1,2}[/-]\d{2,4}|20\d{2}-\d{2}-\d{2})\b",
+        r"\b(?:\d{1,2}[/-]\d{1,2}[/-]\d{2,4}|\d{4}-\d{2}-\d{2}|\d{1,2}\s+(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s+\d{4})\b",
         value,
+        flags=re.I,
     )
-    return (dates[0], dates[1]) if len(dates) >= 2 else ((dates[0], "") if dates else ("", ""))
+    if len(dates) >= 2:
+        return dates[0], dates[1]
+    if not dates:
+        return "", ""
+
+    date = dates[0]
+    lower = value.lower()
+
+    if re.search(
+        r"\b(?:application\s+)?(?:deadline|last date|closes?|closing|close on|ends?|end(?:s)? on)\b",
+        lower,
+    ):
+        return "", date
+
+    if re.search(
+        r"\b(?:application\s+)?(?:opens?|starts?|commences?|begin(?:s)? on)\b",
+        lower,
+    ):
+        return date, ""
+
+    # When only one date is present and no explicit date-role wording is available,
+    # keep the semantic field empty instead of inventing an opening-date label.
+    return "", date
 
 
 def _hook_highlight(subtitle):
